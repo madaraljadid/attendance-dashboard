@@ -3,59 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📊 داشبورد الحضور</title>
+<title>Dashboard</title>
 
 <style>
 body {
-  font-family: Arial;
-  background: #f0f4f8;
-  margin: 0;
-  text-align: center;
+  margin:0;
+  font-family: 'Segoe UI';
+  background:#f1f5f9;
 }
 
 header {
-  background: #0f172a;
-  color: white;
-  padding: 15px;
-  font-size: 20px;
-  font-weight: bold;
+  background:#0f172a;
+  color:white;
+  padding:15px 25px;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.container {
+  padding:20px;
 }
 
 .cards {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 20px;
-  flex-wrap: wrap;
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
 }
 
 .card {
-  background: white;
-  padding: 15px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  min-width: 150px;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-.present { color: #10b981; }
-.absent { color: #ef4444; }
+.card-title {
+  font-size:14px;
+  color:#64748b;
+}
+
+.card-value {
+  font-size:28px;
+  font-weight:bold;
+  margin-top:5px;
+}
+
+.green { color:#10b981; }
+.red { color:#ef4444; }
+.blue { color:#3b82f6; }
+
+.table-box {
+  margin-top:20px;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.08);
+}
 
 table {
-  border-collapse: collapse;
-  width: 95%;
-  margin: auto;
-  background: white;
+  width:100%;
+  border-collapse:collapse;
 }
 
 th, td {
-  padding: 8px;
-  border: 1px solid #ddd;
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
 }
 
 th {
-  background: #3b82f6;
-  color: white;
+  background:#f8fafc;
 }
+
 </style>
 </head>
 
@@ -63,91 +82,38 @@ th {
 
 <header>📊 داشبورد الحضور والغياب</header>
 
-<h3 id="status">جاري تحميل البيانات...</h3>
+<div class="container">
 
-<div class="cards">
-  <div class="card">
-    عدد المتدربين<br>
-    <h2 id="total">0</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">عدد المتدربين</div>
+      <div class="card-value blue" id="total">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">الحضور</div>
+      <div class="card-value green" id="present">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">الغياب</div>
+      <div class="card-value red" id="absent">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">نسبة الحضور</div>
+      <div class="card-value" id="percent">0%</div>
+    </div>
   </div>
 
-  <div class="card present">
-    الحضور<br>
-    <h2 id="present">0</h2>
+  <div class="table-box">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 
-  <div class="card absent">
-    الغياب<br>
-    <h2 id="absent">0</h2>
-  </div>
 </div>
-
-<table>
-<thead id="thead"></thead>
-<tbody id="tbody"></tbody>
-</table>
-
-<script>
-// ✅ رابط Google JSON (يعمل مع GitHub بدون مشاكل)
-const url = "https://opensheet.elk.sh/2PACX-1vQZ7oboudTsfqeW4IflcLUg8FMRJpzMA2Umj_afcQIjLfRmrbAhotbmfeNuvmli_fg_QMUkKxiqtfQK/Sheet1";
-
-async function loadData() {
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-
-    document.getElementById("status").innerText = "✅ تم تحميل البيانات";
-
-    if (!data.length) return;
-
-    const headers = Object.keys(data[0]);
-
-    let thead = "<tr>";
-    headers.forEach(h => thead += `<th>${h}</th>`);
-    thead += "<th>الحضور</th><th>الغياب</th></tr>";
-    document.getElementById("thead").innerHTML = thead;
-
-    let totalPresent = 0;
-    let totalAbsent = 0;
-
-    let html = "";
-
-    data.forEach(row => {
-      let present = 0;
-      let absent = 0;
-
-      html += "<tr>";
-
-      headers.forEach(h => {
-        let val = row[h];
-
-        if (val === "حضور") {
-          present++; totalPresent++;
-          html += `<td class="present">✅</td>`;
-        } else if (val === "غياب") {
-          absent++; totalAbsent++;
-          html += `<td class="absent">❌</td>`;
-        } else {
-          html += `<td>${val}</td>`;
-        }
-      });
-
-      html += `<td>${present}</td><td>${absent}</td></tr>`;
-    });
-
-    document.getElementById("tbody").innerHTML = html;
-
-    document.getElementById("total").innerText = data.length;
-    document.getElementById("present").innerText = totalPresent;
-    document.getElementById("absent").innerText = totalAbsent;
-
-  } catch (err) {
-    document.getElementById("status").innerText = "❌ فشل تحميل البيانات";
-  }
-}
-
-loadData();
-</script>
 
 </body>
 </html>
