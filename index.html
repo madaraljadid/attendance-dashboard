@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إدارة وحصر الحقائب التدريبية</title>
+    <title>المنظومة المتكاملة لإدارة التدريب وحصر الحضور والغياب</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,73 +11,134 @@
             --bg-card: #1C2541;
             --accent-blue: #00B4D8;
             --accent-green: #06D6A0;
+            --accent-red: #EF476F;
+            --accent-orange: #FFD166;
             --text-light: #F4F5F7;
             --text-muted: #A5A5A5;
             --border-color: #3A506B;
         }
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; margin: 0; padding: 0; }
         body { background-color: var(--bg-main); color: var(--text-light); padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; }
-        header h1 { color: var(--accent-blue); font-size: 28px; }
+        .container { max-width: 1300px; margin: 0 auto; }
         
-        /* شريط التنقّل */
-        nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
-        nav button { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-light); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; }
+        header h1 { color: var(--accent-blue); font-size: 28px; }
+        header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+        
+        /* شريط التنقّل العلوي */
+        nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        nav button { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-light); padding: 12px 22px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; transition: 0.3s; }
         nav button:hover, nav button.active { background-color: var(--accent-blue); color: var(--bg-main); font-weight: bold; border-color: var(--accent-blue); }
         
-        .tab-content { display: none; background-color: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); }
+        .tab-content { display: none; background-color: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .tab-content.active { display: block; }
         
-        /* النماذج والجداول */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--accent-blue); }
-        input, textarea, select { width: 100%; padding: 12px; background-color: var(--bg-main); border: 1px solid var(--border-color); color: white; border-radius: 6px; font-size: 16px; }
-        textarea { height: 120px; resize: vertical; }
+        /* كروت الإحصائيات الحيوية */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .stat-card h3 { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+        .stat-card .value { font-size: 28px; font-weight: bold; color: var(--accent-blue); }
         
-        button.btn-submit { background-color: var(--accent-green); color: var(--bg-main); padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
-        button.btn-submit:hover { opacity: 0.9; }
+        /* أدوات التصفية والبحث */
+        .filter-zone { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background-color: rgba(11, 19, 43, 0.6); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: right; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); }
-        th { background-color: var(--border-color); color: var(--accent-blue); font-weight: bold; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--accent-blue); font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; background-color: var(--bg-main); border: 1px solid var(--border-color); color: white; border-radius: 6px; font-size: 15px; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent-blue); outline: none; }
+        textarea { height: 100px; resize: vertical; }
+        
+        /* أزرار الإجراءات */
+        .btn-submit { background-color: var(--accent-green); color: var(--bg-main); padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-submit:hover { opacity: 0.9; box-shadow: 0 0 10px rgba(6, 214, 160, 0.4); }
+        
+        /* الجداول والتصميم المتجاوب */
+        .table-container { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 800px; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background-color: #111A35; color: var(--accent-blue); font-weight: bold; position: sticky; top: 0; }
         tr:hover { background-color: rgba(255,255,255,0.02); }
         
-        .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 14px; font-weight: bold; display: inline-block; }
-        .status-success { background-color: rgba(6, 214, 160, 0.2); color: var(--accent-green); }
+        /* أزرار الحضور داخل الجدول */
+        .action-btn { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; margin-left: 5px; transition: 0.2s; color: #0B132B; }
+        .btn-present { background-color: var(--accent-green); }
+        .btn-absent { background-color: var(--accent-red); }
+        .btn-late { background-color: var(--accent-orange); }
+        .action-btn:hover { opacity: 0.8; transform: scale(1.05); }
         
-        /* تنبيهات الحالة */
+        /* شارات الحالة */
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-block; }
+        .status-present { background-color: rgba(6, 214, 160, 0.15); color: var(--accent-green); }
+        .status-absent { background-color: rgba(239, 71, 111, 0.15); color: var(--accent-red); }
+        .status-late { background-color: rgba(255, 209, 102, 0.15); color: var(--accent-orange); }
+        
         #statusMessage { padding: 12px; border-radius: 6px; margin-top: 15px; text-align: center; display: none; font-weight: bold; }
+        .loading-spinner { text-align: center; padding: 20px; color: var(--accent-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>لوحة تحكم وبوابة المادة التدريبية الذكية</h1>
+        <h1>منظومة إدارة التدريب وحصر الحضور الذكية</h1>
+        <p>نظام متكامل للمزامنة مع جداول بيانات جوجل ورصد الحركات التدريبية تلقائياً</p>
     </header>
 
     <nav>
-        <button onclick="switchTab('settings')" id="tab-settings" class="active">⚙️ الإعدادات والربط</button>
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="active">📊 لوحة رصد الحضور والغياب</button>
         <button onclick="switchTab('material')" id="tab-material">📝 تفاصيل الحقيبة والمادة التدريبية</button>
+        <button onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط</button>
     </nav>
 
-    <div id="content-settings" class="tab-content active">
-        <h2>⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين</h2>
-        <div class="form-group" style="margin-top: 15px;">
-            <label>1. رابط جوجل شيت المباشر (CSV Link):</label>
-            <input type="text" id="csvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+    <div id="content-dashboard" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card"><h3>إجمالي المسجلين</h3><div class="value" id="stat-total">0</div></div>
+            <div class="stat-card"><h3>حضور اليوم</h3><div class="value" id="stat-present" style="color:var(--accent-green);">0</div></div>
+            <div class="stat-card"><h3>غياب اليوم</h3><div class="value" id="stat-absent" style="color:var(--accent-red);">0</div></div>
+            <div class="stat-card"><h3>التأخيرات</h3><div class="value" id="stat-late" style="color:var(--accent-orange);">0</div></div>
         </div>
-        <div class="form-group">
-            <label>2. رابط بوابة التعديل البرمجية الذكية (Google Apps Script Web App URL):</label>
-            <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+
+        <div class="filter-zone">
+            <div class="form-group">
+                <label>بحث باسم المتدرب أو الرقم:</label>
+                <input type="text" id="searchBar" onkeyup="filterTrainees()" placeholder="اكتب للبحث...">
+            </div>
+            <div class="form-group">
+                <label>تصفية بالمجموعة:</label>
+                <select id="groupFilter" onchange="filterTrainees()">
+                    <option value="all">كل المجموعات</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>تاريخ اليوم المراد رصده:</label>
+                <input type="date" id="attendanceDate" onchange="loadTraineesData()">
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button class="btn-submit" style="background-color: var(--accent-blue);" onclick="loadTraineesData()">🔄 تحديث وجلب البيانات</button>
+            </div>
         </div>
-        <div class="form-group">
-            <label>3. اسم المستخدم الحالي المعتمد لإجراء التعديلات:</label>
-            <input type="text" id="usernameInput" value="المشرف المسؤول">
+
+        <div class="table-container">
+            <div id="loadingGrid" class="loading-spinner" style="display:none;">جاري تحميل سجل المتدربين من شيت جوجل...</div>
+            <table id="traineesTable">
+                <thead>
+                    <tr>
+                        <th>الرقم الأكاديمي</th>
+                        <th>اسم المتدرب</th>
+                        <th>المجموعة</th>
+                        <th>التاريخ</th>
+                        <th>الحالة الحالية</th>
+                        <th>المستخدم المعدل</th>
+                        <th>إجراءات الرصد السريع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted);">يرجى ضبط روابط الاتصال في تبويب الإعدادات أولاً لجلب كشف المتدربين.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <button class="btn-submit" onclick="saveSettings()">💾 حفظ إعدادات التهيئة والربط</button>
-        <div id="statusMessage"></div>
     </div>
 
     <div id="content-material" class="tab-content">
@@ -99,38 +160,62 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>التاريخ المعتمد لهذا اليوم:</label>
+                <label>التاريخ المعتمد للحقيبة:</label>
                 <input type="date" id="matDate">
             </div>
         </div>
         <div class="form-group">
             <label>محتوى وتفاصيل الحقيبة المضافة:</label>
-            <textarea id="matContent" placeholder="اكتب هنا محاور التدريب، العناوين الرئيسية، الأنشطة، والمستهدفات الخاصة بهذا اليوم..."></textarea>
+            <textarea id="matContent" placeholder="اكتب هنا محاور التدريب، العناوين الرئيسية، والأنشطة الخاصة بهذا اليوم..."></textarea>
         </div>
         <button class="btn-submit" onclick="submitMaterialForm()">📤 حفظ وتحديث تفاصيل اليوم التدريبي</button>
 
         <h3 style="margin-top: 35px; color: var(--accent-blue);">📋 السجل التاريخي للحقائب والمواد المدخلة</h3>
-        <table id="materialTable">
-            <thead>
-                <tr>
-                    <th>اليوم</th>
-                    <th>التاريخ</th>
-                    <th>محتوى وتفاصيل الحقيبة المضافة</th>
-                    <th>بواسطة</th>
-                    <th>وقت الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="5" style="text-align: center; color: var(--text-muted);">يرجى حفظ الروابط أولاً لجلب السجل المحدث...</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="materialTable">
+                <thead>
+                    <tr>
+                        <th>اليوم التدريبي</th>
+                        <th>التاريخ المعتمد</th>
+                        <th>محتوى وتفاصيل الحقيبة المضافة</th>
+                        <th>بواسطة</th>
+                        <th>وقت الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted);">يرجى تهيئة الروابط لجلب سجل الحقائب...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="content-settings" class="tab-content">
+        <h2>⚙️ روابط تهيئة الاتصال والمزامنة والأمان</h2>
+        <div class="form-group" style="margin-top: 15px;">
+            <label>1. رابط جوجل شيت المباشر المصدر (CSV Link):</label>
+            <input type="text" id="csvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+        </div>
+        <div class="form-group">
+            <label>2. رابط بوابة التعديل البرمجية (Google Apps Script Web App URL):</label>
+            <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <div class="form-group">
+            <label>3. اسم المستخدم الحالي المسؤول عن الرصد والتعديل:</label>
+            <input type="text" id="usernameInput" value="المشرف المسؤول">
+        </div>
+        <button class="btn-submit" onclick="saveSettings()">💾 حفظ إعدادات التهيئة والربط</button>
+        <div id="statusMessage"></div>
     </div>
 </div>
 
 <script>
-    // التنقل بين الأقسام
+    let rawTraineesData = []; // لتخزين البيانات المستوردة خام
+
+    // تعيين تاريخ اليوم تلقائياً عند الفتح
+    document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
@@ -138,43 +223,192 @@
         document.getElementById('content-' + tabId).classList.add('active');
         document.getElementById('tab-' + tabId).classList.add('active');
         
-        if (tabId === 'material') {
-            loadSpecificDayMaterial();
-            loadMaterialTable();
-        }
+        if (tabId === 'dashboard') { loadTraineesData(); }
+        if (tabId === 'material') { loadSpecificDayMaterial(); loadMaterialTable(); }
     }
 
-    // حفظ واسترجاع الإعدادات من ذاكرة المتصفح المحلية
     function saveSettings() {
         localStorage.setItem('csvUrl', document.getElementById('csvUrlInput').value.trim());
         localStorage.setItem('scriptUrl', document.getElementById('scriptUrlInput').value.trim());
         localStorage.setItem('savedUsername', document.getElementById('usernameInput').value.trim());
         
-        showNotification('✅ تم حفظ إعدادات الاتصال والمزامنة بنجاح!', 'var(--accent-green)');
+        const msg = document.getElementById('statusMessage');
+        msg.style.display = 'block';
+        msg.style.backgroundColor = 'var(--accent-green)';
+        msg.style.color = '#0B132B';
+        msg.innerText = '✅ تم حفظ إعدادات المنظومة المتكاملة وتحديث الاتصال!';
+        setTimeout(() => { msg.style.display = 'none'; }, 4000);
+        loadTraineesData();
     }
 
     window.onload = function() {
         if(localStorage.getItem('csvUrl')) document.getElementById('csvUrlInput').value = localStorage.getItem('csvUrl');
         if(localStorage.getItem('scriptUrl')) document.getElementById('scriptUrlInput').value = localStorage.getItem('scriptUrl');
         if(localStorage.getItem('savedUsername')) document.getElementById('usernameInput').value = localStorage.getItem('savedUsername');
+        loadTraineesData();
     }
 
-    function showNotification(text, color) {
-        const msg = document.getElementById('statusMessage');
-        msg.style.display = 'block';
-        msg.style.backgroundColor = color;
-        msg.style.color = '#0B132B';
-        msg.innerText = text;
-        setTimeout(() => { msg.style.display = 'none'; }, 4000);
+    // 📊 دالة جلب المتدربين ومعالجة الـ CSV وعرضهم بلوحة التحكم الأساسية
+    function loadTraineesData() {
+        const csvUrl = localStorage.getItem('csvUrl');
+        if (!csvUrl) return;
+
+        document.getElementById('loadingGrid').style.display = 'block';
+        const targetDate = document.getElementById('attendanceDate').value;
+
+        fetch(csvUrl + "&t=" + new Date().getTime()) // كسر الكاش لضمان جلب البيانات المحدثة فورا
+        .then(res => res.text())
+        .then(text => {
+            document.getElementById('loadingGrid').style.display = 'none';
+            parseAndBuildTable(text, targetDate);
+        }).catch(() => {
+            document.getElementById('loadingGrid').style.display = 'none';
+        });
     }
 
-    // جلب بيانات يوم محدد تلقائياً عند تغييره من القائمة
+    function parseAndBuildTable(csvText, targetDate) {
+        const lines = csvText.split('\n').map(line => line.split(','));
+        if(lines.length <= 1) return;
+
+        const headers = lines[0].map(h => h.replace(/"/g, '').toLowerCase().trim());
+        
+        // البحث عن مؤشرات الأعمدة داخل الشيت
+        let idxId = headers.findIndex(h => h.includes('id') || h.includes('رقم') || h.includes('الأكاديمي'));
+        let idxName = headers.findIndex(h => h.includes('name') || h.includes('اسم'));
+        let idxGroup = headers.findIndex(h => h.includes('group') || h.includes('مجموعة'));
+        let idxDate = headers.findIndex(h => h.includes('date') || h.includes('تاريخ'));
+        let idxType = headers.findIndex(h => h.includes('type') || h.includes('حركة') || h.includes('الحالة'));
+        let idxUser = headers.findIndex(h => h.includes('user') || h.includes('المستخدم') || h.includes('المعدل'));
+
+        if(idxId === -1) idxId = 0; if(idxName === -1) idxName = 1; if(idxGroup === -1) idxGroup = 2;
+        if(idxDate === -1) idxDate = 3; if(idxType === -1) idxType = 5; if(idxUser === -1) idxUser = 6;
+
+        rawTraineesData = [];
+        const groups = new Set();
+        let total = 0, present = 0, absent = 0, late = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+            if (lines[i].length <= 1 || !lines[i][idxName]) continue;
+
+            let rowDate = lines[i][idxDate] ? lines[i][idxDate].replace(/"/g, '').trim() : '';
+            // تنظيف تواريخ شيت جوجل لتتوافق مع تصفية التاريخ باللوحة
+            let cleanRowDate = rowDate.replace(/\//g, '-');
+
+            let item = {
+                id: lines[i][idxId] ? lines[i][idxId].replace(/"/g, '').trim() : '',
+                name: lines[i][idxName] ? lines[i][idxName].replace(/"/g, '').trim() : '',
+                group: lines[i][idxGroup] ? lines[i][idxGroup].replace(/"/g, '').trim() : 'المجموعة الأولى',
+                date: rowDate,
+                status: lines[i][idxType] ? lines[i][idxType].replace(/"/g, '').trim() : 'لم يرصد',
+                user: lines[i][idxUser] ? lines[i][idxUser].replace(/"/g, '').trim() : '—'
+            };
+
+            groups.add(item.group);
+            total++;
+
+            // احتساب إحصائيات اليوم المختار فقط
+            if (cleanRowDate === targetDate) {
+                if (item.status.includes('حاضر')) present++;
+                else if (item.status.includes('غائب')) absent++;
+                else if (item.status.includes('متأخر')) late++;
+            }
+
+            rawTraineesData.push(item);
+        }
+
+        // تحديث كروت الأرقام العلوية بالمنظومة
+        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-present').innerText = present;
+        document.getElementById('stat-absent').innerText = absent;
+        document.getElementById('stat-late').innerText = late;
+
+        // بناء قائمة المجموعات المتاحة ديناميكياً للفلاتر
+        const selectFilter = document.getElementById('groupFilter');
+        selectFilter.innerHTML = '<option value="all">كل المجموعات</option>';
+        groups.forEach(g => { if(g) selectFilter.innerHTML += `<option value="${g}">${g}</option>`; });
+
+        renderTable(rawTraineesData);
+    }
+
+    function renderTable(dataList) {
+        const tbody = document.querySelector('#traineesTable tbody');
+        tbody.innerHTML = '';
+
+        if(dataList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">لا توجد بيانات مطابقة لخيارات البحث الحالية...</td></tr>`;
+            return;
+        }
+
+        dataList.forEach(item => {
+            let badgeClass = 'status-present';
+            if (item.status.includes('غائب')) badgeClass = 'status-absent';
+            if (item.status.includes('متأخر')) badgeClass = 'status-late';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${item.id}</b></td>
+                <td>${item.name}</td>
+                <td>${item.group}</td>
+                <td>${item.date || '—'}</td>
+                <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                <td style="font-size:12px; color:var(--text-muted);">${item.user}</td>
+                <td>
+                    <button class="action-btn btn-present" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'حاضر')">حاضر</button>
+                    <button class="action-btn btn-absent" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'غائب')">غائب</button>
+                    <button class="action-btn btn-late" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'متأخر')">متأخر</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterTrainees() {
+        const query = document.getElementById('searchBar').value.toLowerCase().trim();
+        const selectedGroup = document.getElementById('groupFilter').value;
+
+        const filtered = rawTraineesData.filter(item => {
+            const matchesSearch = item.name.toLowerCase().includes(query) || item.id.toLowerCase().includes(query);
+            const matchesGroup = (selectedGroup === 'all' || item.group === selectedGroup);
+            return matchesSearch && matchesGroup;
+        });
+
+        renderTable(filtered);
+    }
+
+    // ⚡ دالة رصد الحضور والاتصال ببوابة التعديل Apps Script البرمجية
+    function changeStatus(traineeId, traineeName, groupName, statusLabel) {
+        const scriptUrl = localStorage.getItem('scriptUrl');
+        if(!scriptUrl) { alert('يرجى تهيئة رابط البوابة البرمجية في قسم الإعدادات أولاً!'); return; }
+
+        const payload = {
+            action: "updateStatus",
+            traineeId: traineeId,
+            traineeName: traineeName,
+            group: groupName,
+            date: document.getElementById('attendanceDate').value,
+            status: statusLabel,
+            username: localStorage.getItem('savedUsername') || 'المشرف المسؤول'
+        };
+
+        fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert(`📥 تم رصد [${traineeName}] كـ (${statusLabel}) بنجاح داخل شيت جوجل!`);
+            setTimeout(() => { loadTraineesData(); }, 1500); // تحديث سريع للبيانات
+        }).catch(() => {
+            alert('خطأ في إرسال حركة الحضور.');
+        });
+    }
+
+    // 📝 دوال تبويب الحقيبة التدريبية
     function loadSpecificDayMaterial() {
         const scriptUrl = localStorage.getItem('scriptUrl');
         if (!scriptUrl) return;
         
         const day = document.getElementById('matDayNumber').value;
-        
         fetch(`${scriptUrl}?action=getMaterial&dayNumber=${day}`, { method: 'GET', redirect: 'follow' })
         .then(res => res.json())
         .then(data => {
@@ -182,34 +416,32 @@
                 document.getElementById('matContent').value = data.content || '';
                 document.getElementById('matDate').value = data.materialDate || '';
             }
-        }).catch(err => console.log('انتظار تهيئة الرابط...'));
+        });
     }
 
-    // إرسال وحفظ تفاصيل الحقيبة والمادة التدريبية لشيت جوجل
     function submitMaterialForm() {
         const scriptUrl = localStorage.getItem('scriptUrl');
-        if (!scriptUrl) { alert('الرجاء إدخال وحفظ رابط بوابة التعديل أولاً في تبويب الإعدادات!'); return; }
+        if (!scriptUrl) { alert('يرجى حفظ رابط بوابة التعديل أولاً!'); return; }
         
         const payload = {
             action: "updateMaterial",
             dayNumber: document.getElementById('matDayNumber').value,
             materialDate: document.getElementById('matDate').value,
             content: document.getElementById('matContent').value.trim(),
-            username: localStorage.getItem('savedUsername') || 'مشرف المنظومة'
+            username: localStorage.getItem('savedUsername') || 'المشرف المسؤول'
         };
 
         fetch(scriptUrl, {
             method: 'POST',
-            mode: 'no-cors', // متوافق مع قيود الأمان لروابط جوجل وإعادة التوجيه
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert('📥 تم إرسال الأمر وتحديث تفاصيل المادة التدريبية بنجاح داخل شيت جوجل!');
+            alert('📥 تم حفظ وتحديث تفاصيل اليوم التدريبي الحالي في السيرفر!');
             setTimeout(() => { loadMaterialTable(); }, 1500);
-        }).catch(err => alert('حدث خطأ أثناء الاتصال بالسيرفر.'));
+        });
     }
 
-    // جلب جدول المواد المضافة بالكامل وعرضه بالسفل
     function loadMaterialTable() {
         const scriptUrl = localStorage.getItem('scriptUrl');
         if (!scriptUrl) return;
@@ -221,7 +453,7 @@
             tbody.innerHTML = '';
             
             if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">لا توجد مواد مضافة حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">لا توجد مواد تدريبية محفوظة حالياً.</td></tr>`;
                 return;
             }
             
@@ -230,14 +462,12 @@
                 tr.innerHTML = `
                     <td><b>اليوم ${item.dayNumber}</b></td>
                     <td>${item.materialDate || '—'}</td>
-                    <td><div style="max-width:400px; white-space:pre-wrap;">${item.content}</div></td>
-                    <td><span class="status-badge status-success">${item.username}</span></td>
-                    <td style="font-size:13px; color:var(--text-muted);">${item.time}</td>
+                    <td><div style="max-width:500px; white-space:pre-wrap;">${item.content}</div></td>
+                    <td><span class="status-badge status-present" style="color:var(--accent-blue); background:rgba(0,180,216,0.15);">${item.username}</span></td>
+                    <td style="font-size:12px; color:var(--text-muted);">${item.time}</td>
                 `;
                 tbody.appendChild(tr);
             });
-        }).catch(() => {
-            document.querySelector('#materialTable tbody').innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">خطأ أو تأخر في الاستجابة، أعد تحديث الصفحة المحفوظة...</td></tr>`;
         });
     }
 </script>
