@@ -36,7 +36,6 @@
   header { display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--border); margin-bottom:25px; flex-wrap:wrap; gap:15px; }
   .logo { font-size:1.4rem; font-weight:900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   
-  /* مؤشر الاتصال الذكي */
   .conn-status { display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.05); }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
   .dot-green { background: var(--green); box-shadow: 0 0 8px var(--green); }
@@ -46,7 +45,7 @@
   .tabs { display:flex; gap:8px; margin-bottom:25px; background:var(--card); padding:6px; border-radius:14px; border:1px solid var(--border); width:fit-content; flex-wrap: wrap; }
   .tab { padding:8px 20px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-family:'Cairo',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; }
   .tab.active { background:linear-gradient(135deg, var(--accent2), var(--accent)); color:#fff; box-shadow:0 4px 15px rgba(0,102,255,0.3); }
-  #tab-settings { display: none; } /* مخفي تلقائياً */
+  #tab-settings { display: none; }
 
   .page { display:none; }
   .page.active { display:block; }
@@ -79,7 +78,6 @@
   .audit-text { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 2px; }
   .chart-container { position: relative; height: 220px; width: 100%; }
 
-  /* تنسيق شاشة الحقيبة التدريبية: اللوحة الجانبية كجدول كامل تفصيلي */
   .material-layout { display: flex; flex-direction: column; gap: 20px; }
   .sidebar-table-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; max-height: 300px; overflow-y: auto; }
   .interactive-row { cursor: pointer; transition: 0.2s; }
@@ -88,6 +86,7 @@
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-card">
     <h2 style="margin-bottom: 20px; font-weight: 900; color: var(--accent);">🔐 تسجيل الدخول للنظام</h2>
@@ -104,8 +103,10 @@
   </div>
 </div>
 
+<!-- MAIN CONTAINER -->
 <div class="container" id="main-container">
 
+  <!-- SYSTEM HEADER -->
   <header>
     <div>
       <div class="logo">📊 لوحة الحضور الإدارية الذكية المتكاملة</div>
@@ -121,6 +122,7 @@
     </div>
   </header>
 
+  <!-- TABS NAV -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('dashboard')">📈 الإحصائيات الحالية اليومية</button>
     <button class="tab" onclick="switchTab('logs')">📋 السجل العام وإدارة الحالات</button>
@@ -129,6 +131,7 @@
     <button class="tab" id="tab-settings" onclick="switchTab('settings')">⚙️ الإعدادات والربط</button>
   </div>
 
+  <!-- PAGE: DASHBOARD -->
   <div id="page-dashboard" class="page active">
     <div class="grid-3">
       <div class="stat-card">
@@ -176,6 +179,7 @@
     </div>
   </div>
 
+  <!-- PAGE: LOGS -->
   <div id="page-logs" class="page">
     <div class="filter-panel">
       <div class="form-group">
@@ -223,6 +227,7 @@
     </div>
   </div>
 
+  <!-- PAGE: ABSENCE -->
   <div id="page-absence" class="page">
     <div class="card">
       <div class="card-title">🔍 نظام الفحص والكشف التلقائي الذكي عن الغائبين</div>
@@ -250,9 +255,9 @@
     </div>
   </div>
 
+  <!-- PAGE: MATERIAL -->
   <div id="page-material" class="page">
     <div class="material-layout">
-      
       <div class="card" style="margin-bottom:0;">
         <div class="card-title">📚 تفاصيل وإدارة محتوى الحقيبة التدريبية اليومية</div>
         
@@ -278,6 +283,12 @@
           </div>
         </div>
 
+        <!-- التعديل المضاف: حقل كتابة وتعديل أسماء المدربين يدوياً قبل الحفظ والمزامنة السحابية -->
+        <div class="form-group" style="margin-bottom:15px;">
+          <label>👥 أسماء المدربين المسؤولين عن هذا اليوم (يمكن كتابة مدرب واحد أو أكثر يدوياً):</label>
+          <input type="text" id="material-trainers-input" class="form-control" placeholder="مثال: أحمد، سارة، علي...">
+        </div>
+
         <div class="form-group" style="margin-bottom:15px;">
           <label>محتوى وتفاصيل المادة لليوم المحدد:</label>
           <textarea id="material-editor" class="form-control" style="min-height:160px; font-size:1rem; line-height:1.6;" placeholder="اكتب تفاصيل المادة، المحاور، الأهداف، والجدول التدريبي هنا..."></textarea>
@@ -288,6 +299,7 @@
         </div>
       </div>
 
+      <!-- جدول تفصيلي يعرض سجل إدخالات المدربين باليوم بالكامل وتفاعلي عند النقر -->
       <div class="sidebar-table-panel">
         <h4 style="font-size:0.9rem; font-weight:700; color:var(--accent); margin-bottom:10px;">📋 السجلات الحالية المدخلة من قِبل المدربين باليوم التفصيلي</h4>
         <div class="table-wrap">
@@ -307,10 +319,10 @@
           </table>
         </div>
       </div>
-
     </div>
   </div>
 
+  <!-- PAGE: SETTINGS -->
   <div id="page-settings" class="page">
     <div class="card">
       <div class="card-title">⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين المعتمدين</div>
@@ -332,14 +344,13 @@
 // ==================== CONFIG & APPROVED USERS ====================
 const APPROVED_USERS = {
   "admin": "1234",
-  "k.bobshan": "1234",
-  "b.krier": "1234",
-  "o.alhoeg": "1234",
+  "trainer1": "pass1",
+  "أحمد": "safe2026",
   "سارة": "pass2026"
 };
 
-let GOOGLE_CSV_URL = localStorage.getItem('dash_google_csv') || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ7oboudTsfqeW4IflcLUg8FMRJpzMA2Umj_afcQIjLfRmrbAhotbmfeNuvmli_fg_QMUkKxiqtfQK/pub?gid=720402532&single=true&output=csv';
-let GOOGLE_SCRIPT_URL = localStorage.getItem('dash_script_url') || 'https://script.google.com/macros/s/AKfycbxhYotI8jCptoz6RtWiTOBO_eeS_RzTUqktkmh15Qx70VZoXeW0zm6r9j01pYPOKvXP/exec';
+let GOOGLE_CSV_URL = localStorage.getItem('dash_google_csv') || '';
+let GOOGLE_SCRIPT_URL = localStorage.getItem('dash_script_url') || '';
 
 let SERVER_DATA = [];
 let SYSTEM_TRAINEES = [];
@@ -352,7 +363,6 @@ let currentThemeIdx = 0;
 let chartPie = null;
 let chartLine = null;
 
-// دالة لتحديث حالة مؤشر الشبكة والاتصال
 function setConnectionStatus(statusType, text) {
   const indicator = document.getElementById('conn-indicator');
   if(statusType === 'success') {
@@ -364,7 +374,7 @@ function setConnectionStatus(statusType, text) {
   }
 }
 
-// ==================== AUTHENTICATION & PRIVILEGES ====================
+// ==================== AUTHENTICATION ====================
 function handleLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
@@ -375,7 +385,6 @@ function handleLogin() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('main-container').style.display = 'block';
     
-    // التعديل الثامن: حصر ظهور تبويب الإعدادات والربط على حساب admin فقط
     const settingsTab = document.getElementById('tab-settings');
     if (CURRENT_USER.toLowerCase() === 'admin') {
       settingsTab.style.display = 'inline-block';
@@ -413,8 +422,8 @@ function initSystem() {
   document.getElementById('flt-date').value = todayIso;
   document.getElementById('material-date-input').value = todayIso;
   
-  fetchCsvFromGoogleSheets();
-  loadMaterialContent();
+  if(GOOGLE_CSV_URL) fetchCsvFromGoogleSheets();
+  if(GOOGLE_SCRIPT_URL) loadMaterialContent();
 }
 
 function switchTab(tabId) {
@@ -430,6 +439,10 @@ function switchTab(tabId) {
 
 // ==================== FETCH & PARSE DATA ====================
 function fetchCsvFromGoogleSheets() {
+  if(!GOOGLE_CSV_URL) {
+    setConnectionStatus('danger', 'تنبيه: لم يتم ربط رابط ملف الـ CSV بعد في لوحة التحكم.');
+    return;
+  }
   setConnectionStatus('pending', 'جاري جلب البيانات من ملف الإكسل...');
   fetch(GOOGLE_CSV_URL)
   .then(res => {
@@ -458,7 +471,6 @@ function parseCsvToData(csvText) {
 
   const headers = lines[0].split(',').map(h => h.replace(/["']/g, "").trim());
   
-  // التعديل الرابع: مرونة قامة فائقة في التعرف على الأعمدة وتلافي مشكلة الاختفاء
   let idxId = headers.findIndex(h => h.toLowerCase().includes('id') || h.includes('رقم') || h.includes('الأكاديمي'));
   let idxName = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('اسم') || h.includes('الطالب'));
   let idxGroup = headers.findIndex(h => h.toLowerCase().includes('group') || h.includes('مجموعة') || h.includes('الفئة'));
@@ -512,7 +524,6 @@ function updateAnalyticsAndCounters() {
   document.getElementById('st-total-records').textContent = SERVER_DATA.length;
   document.getElementById('st-unique-trainees').textContent = SYSTEM_TRAINEES.length;
   
-  // التعديل الأول: حساب غيابات اليوم الفعلي المكتشفة تلقائياً وعرضها بالبطاقة الحمراء
   const localTodayStr = new Date().toISOString().split('T')[0];
   const formattedToday = new Date().toLocaleDateString('ar-SA').replace(/\//g, '-');
   
@@ -547,7 +558,6 @@ function renderDashboardCharts() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { position: 'right', labels: { color: '#e8f0fe', font: { family: 'Cairo' } } } },
-      // التعديل الثاني: عند النقر المباشر على الرسم البياني تظهر قائمة الحاضرين بالكامل
       onClick: (evt, item) => {
         if(item && item.length > 0) {
           const index = item[0].index;
@@ -592,7 +602,6 @@ function renderDashboardCharts() {
   });
 }
 
-// التعديل الثاني: دالة سرد رقم واسم المتدرب تفاعلياً بجانب الرسم البياني للمجموعات المعتمدة
 function showGroupTraineesInteractively(groupName) {
   document.getElementById('selected-group-title').innerHTML = `📌 متدربي الحضور في: <span style="color:var(--green)">${groupName}</span>`;
   const localTodayStr = new Date().toISOString().split('T')[0];
@@ -713,16 +722,21 @@ function executeAbsenceCheck() {
 }
 
 // ==================== MATERIAL & SIDEBAR TABLE ENGINE ====================
-
 function saveMaterialContent() {
   const txt = document.getElementById('material-editor').value;
   const selectedDay = document.getElementById('material-day-select').value;
   const selectedDate = document.getElementById('material-date-input').value;
+  const trainersInput = document.getElementById('material-trainers-input').value.trim();
 
   if(!selectedDate) {
     alert("❌ يرجى اختيار تاريخ مرافق لليوم التدريبي أولاً!");
     return;
   }
+  if(!trainersInput) {
+    alert("❌ يرجى كتابة اسم المدرب المسؤول أو المدربين قبل الحفظ!");
+    return;
+  }
+
   setConnectionStatus('pending', 'جاري حفظ مادة الحقيبة التدريبية...');
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
@@ -733,7 +747,7 @@ function saveMaterialContent() {
       content: txt,
       dayNumber: selectedDay,
       materialDate: selectedDate,
-      username: CURRENT_USER
+      username: trainersInput // إرسال الأسماء المكتوبة يدوياً في الخانة بدلاً من الاسم التلقائي
     })
   }).then(() => {
     alert(`✅ تم حفظ وتأكيد بيانات الحقيبة لـ (${selectedDay}) بنجاح.`);
@@ -753,21 +767,22 @@ function loadMaterialContent() {
     if(data && data.materialDate) {
       document.getElementById('material-editor').value = data.content;
       document.getElementById('material-date-input').value = data.materialDate;
+      document.getElementById('material-trainers-input').value = data.username; // تعبئة خانة المدربين بالأسماء المسترجعة من الشيت
       document.getElementById('material-audit-info').innerHTML = `📝 المدربين المعتمدين لليوم: <strong style="color:var(--accent)">${data.username}</strong> | الإجراء: (${data.time})`;
     } else {
       document.getElementById('material-editor').value = "";
       document.getElementById('material-date-input').value = new Date().toISOString().split('T')[0];
+      document.getElementById('material-trainers-input').value = CURRENT_USER; // وضع اسم المستخدم الحالي كخيار افتراضي قابل للتعديل والمسح يدوياً
       document.getElementById('material-audit-info').innerHTML = `💡 <span style="color:var(--green)">هذا اليوم (${selectedDay}) فارغ ومتاح للتعبئة التشاركية الآن.</span>`;
     }
   }).catch(() => { document.getElementById('material-audit-info').innerHTML = `❌ خطأ بمزامنة محتوى اليوم.`; });
 
-  // تحديث جدول السجلات الحالية بالكامل
   updateSidebarTableRecords();
 }
 
-// التعديل السادس والسابع: توليد جدول تفصيلي كامل يعرض سجل الأيام والمدربين المتعددين
 function updateSidebarTableRecords() {
   const tbody = document.getElementById('sidebar-table-records-body');
+  if(!GOOGLE_SCRIPT_URL) return;
   
   fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterialList`)
   .then(res => res.json())
@@ -789,7 +804,6 @@ function updateSidebarTableRecords() {
         </tr>
       `;
     }).join('');
-    setConnectionStatus('success', 'حالة الربط: متصل ومزامن (توقيت ليبيا)');
   }).catch(() => {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--red)">❌ تعذر جلب السجل التفصيلي من السيرفر.</td></tr>';
   });
