@@ -1,119 +1,119 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
 
-<style>
-body {
-  margin:0;
-  font-family: 'Segoe UI';
-  background:#f1f5f9;
+<script>
+// ================== ✅ ANALYTICS + FILTERS (جاهز كامل) ==================
+
+// تحديد الأسبوع تلقائياً من التاريخ
+function getWeek(dateStr){
+  if(!dateStr) return 1;
+
+  const parts = dateStr.split('/');
+  if(parts.length < 3) return 1;
+
+  const d = new Date(parts[2], parts[1]-1, parts[0]);
+  const day = d.getDate();
+
+  if(day <= 7) return 1;
+  if(day <= 14) return 2;
+  return 3;
 }
 
-header {
-  background:#0f172a;
-  color:white;
-  padding:15px 25px;
-  font-size:18px;
-  font-weight:bold;
+// ✅ فلتر الأسبوع + التاريخ
+function getFilteredRecords() {
+
+  let data = records;
+
+  if(specificDate){
+    data = data.filter(r=>{
+      const d = new Date(r.ts);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      return ds === specificDate;
+    });
+  }
+
+  if(currentDuration !== 'all'){
+    const cutoff = Date.now() - (currentDuration * 24 * 60 * 60 * 1000);
+    data = data.filter(r => r.ts >= cutoff);
+  }
+
+  const weekFilter = document.getElementById("weekFilter")?.value;
+
+  if(weekFilter && weekFilter !== "all"){
+    data = data.filter(r => getWeek(r.date) == weekFilter);
+  }
+
+  return data;
 }
 
-.container {
-  padding:20px;
+// ================== ✅ ANALYTICS ==================
+
+function updateAnalytics(){
+
+  const trainees = {};
+  const daysSet = new Set();
+
+  let totalPresent = 0;
+
+  records.forEach(r=>{
+    if(!trainees[r.id]){
+      trainees[r.id] = {name:r.name, present:0, absent:0};
+    }
+
+    if(r.type === 'حضور'){
+      trainees[r.id].present++;
+      totalPresent++;
+    } else {
+      trainees[r.id].absent++;
+    }
+
+    daysSet.add(r.date);
+  });
+
+  const list = Object.values(trainees);
+
+  // ✅ Top 5 حضور
+  const top = [...list].sort((a,b)=>b.present-a.present).slice(0,5);
+
+  document.getElementById("top5-box").innerHTML =
+    top.map(t=>`<div>🏆 ${t.name} (${t.present})</div>`).join("");
+
+  // ✅ Worst 5
+  const worst = [...list].sort((a,b)=>b.absent-a.absent).slice(0,5);
+
+  document.getElementById("worst5-box").innerHTML =
+    worst.map(t=>`<div>⚠️ ${t.name} (${t.absent})</div>`).join("");
+
+  // ✅ متوسط يومي
+  const avg = daysSet.size ? Math.round(totalPresent / daysSet.size) : 0;
+  document.getElementById("avgDailyBox").innerText = avg;
+
+  // ✅ تحليل الأسابيع
+  const weeks = {
+    1:{p:0,t:0},
+    2:{p:0,t:0},
+    3:{p:0,t:0}
+  };
+
+  records.forEach(r=>{
+    const w = getWeek(r.date);
+    weeks[w].t++;
+    if(r.type==='حضور') weeks[w].p++;
+  });
+
+  document.getElementById("w1Box").innerText =
+    weeks[1].t ? Math.round(weeks[1].p / weeks[1].t *100)+"%" : "0%";
+
+  document.getElementById("w2Box").innerText =
+    weeks[2].t ? Math.round(weeks[2].p / weeks[2].t *100)+"%" : "0%";
+
+  document.getElementById("w3Box").innerText =
+    weeks[3].t ? Math.round(weeks[3].p / weeks[3].t *100)+"%" : "0%";
 }
 
-.cards {
-  display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
-  gap:15px;
+// ================== ✅ HOOK ==================
+
+const oldUpdateStats = updateStats;
+updateStats = function(){
+  oldUpdateStats();
+  updateAnalytics();
 }
-
-.card {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.08);
-}
-
-.card-title {
-  font-size:14px;
-  color:#64748b;
-}
-
-.card-value {
-  font-size:28px;
-  font-weight:bold;
-  margin-top:5px;
-}
-
-.green { color:#10b981; }
-.red { color:#ef4444; }
-.blue { color:#3b82f6; }
-
-.table-box {
-  margin-top:20px;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.08);
-}
-
-table {
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td {
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-}
-
-th {
-  background:#f8fafc;
-}
-
-</style>
-</head>
-
-<body>
-
-<header>📊 داشبورد الحضور والغياب</header>
-
-<div class="container">
-
-  <div class="cards">
-    <div class="card">
-      <div class="card-title">عدد المتدربين</div>
-      <div class="card-value blue" id="total">0</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">الحضور</div>
-      <div class="card-value green" id="present">0</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">الغياب</div>
-      <div class="card-value red" id="absent">0</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">نسبة الحضور</div>
-      <div class="card-value" id="percent">0%</div>
-    </div>
-  </div>
-
-  <div class="table-box">
-    <table>
-      <thead id="thead"></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-</div>
-
-</body>
-</html>
+</script>
