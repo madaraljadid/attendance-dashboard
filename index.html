@@ -80,14 +80,14 @@
 
 <div class="container">
     <header>
-        <h1>منظومة إدارة التدريب وحصر الحضور الذكية</h1>
+        <h1>منظومة إدارة التدريب وحصر الحضور والغياب المتكاملة</h1>
         <p>نظام متكامل للمزامنة مع جداول بيانات جوجل ورصد الحركات التدريبية تلقائياً</p>
     </header>
 
     <nav>
         <button onclick="switchTab('dashboard')" id="tab-dashboard" class="active">📊 لوحة رصد الحضور والغياب</button>
         <button onclick="switchTab('material')" id="tab-material">📝 تفاصيل الحقيبة والمادة التدريبية</button>
-        <button onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط</button>
+        <button onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط والمستخدمين</button>
     </nav>
 
     <div id="content-dashboard" class="tab-content active">
@@ -134,7 +134,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted);">يرجى ضبط روابط الاتصال في تبويب الإعدادات أولاً لجلب كشف المتدربين.</td>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted);">يرجى ضبط روابط الاتصال وأسماء المستخدمين في تبويب الإعدادات أولاً.</td>
                     </tr>
                 </tbody>
             </table>
@@ -178,7 +178,7 @@
                         <th>اليوم التدريبي</th>
                         <th>التاريخ المعتمد</th>
                         <th>محتوى وتفاصيل الحقيبة المضافة</th>
-                        <th>بواسطة</th>
+                        <th>بواسطة المشرف</th>
                         <th>وقت الإجراء</th>
                     </tr>
                 </thead>
@@ -192,20 +192,25 @@
     </div>
 
     <div id="content-settings" class="tab-content">
-        <h2>⚙️ روابط تهيئة الاتصال والمزامنة والأمان</h2>
+        <h2>⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين</h2>
+        
         <div class="form-group" style="margin-top: 15px;">
             <label>1. رابط جوجل شيت المباشر المصدر (CSV Link):</label>
             <input type="text" id="csvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
         </div>
+        
         <div class="form-group">
             <label>2. رابط بوابة التعديل البرمجية (Google Apps Script Web App URL):</label>
             <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
-        <div class="form-group">
-            <label>3. اسم المستخدم الحالي المسؤول عن الرصد والتعديل:</label>
+        
+        <div class="form-group" style="background-color: rgba(0, 180, 216, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--accent-blue);">
+            <label style="font-weight: bold; font-size: 15px;">👤 هوية المستخدم (المشرف المسؤول عن الرصد حالياً):</label>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">الاسم المكتوب هنا سيتم ترحيله تلقائياً إلى شيت جوجل في عمود "المعدل بواسطة" عند ضغط أزرار الحضور.</p>
             <input type="text" id="usernameInput" value="المشرف المسؤول">
         </div>
-        <button class="btn-submit" onclick="saveSettings()">💾 حفظ إعدادات التهيئة والربط</button>
+        
+        <button class="btn-submit" onclick="saveSettings()">💾 حفظ إعدادات التهيئة والربط والمستخدم</button>
         <div id="statusMessage"></div>
     </div>
 </div>
@@ -236,7 +241,7 @@
         msg.style.display = 'block';
         msg.style.backgroundColor = 'var(--accent-green)';
         msg.style.color = '#0B132B';
-        msg.innerText = '✅ تم حفظ إعدادات المنظومة المتكاملة وتحديث الاتصال!';
+        msg.innerText = '✅ تم حفظ إعدادات المنظومة المتكاملة وتحديث اسم المستخدم المعتمد!';
         setTimeout(() => { msg.style.display = 'none'; }, 4000);
         loadTraineesData();
     }
@@ -291,7 +296,6 @@
             if (lines[i].length <= 1 || !lines[i][idxName]) continue;
 
             let rowDate = lines[i][idxDate] ? lines[i][idxDate].replace(/"/g, '').trim() : '';
-            // تنظيف تواريخ شيت جوجل لتتوافق مع تصفية التاريخ باللوحة
             let cleanRowDate = rowDate.replace(/\//g, '-');
 
             let item = {
@@ -306,7 +310,6 @@
             groups.add(item.group);
             total++;
 
-            // احتساب إحصائيات اليوم المختار فقط
             if (cleanRowDate === targetDate) {
                 if (item.status.includes('حاضر')) present++;
                 else if (item.status.includes('غائب')) absent++;
@@ -316,13 +319,11 @@
             rawTraineesData.push(item);
         }
 
-        // تحديث كروت الأرقام العلوية بالمنظومة
         document.getElementById('stat-total').innerText = total;
         document.getElementById('stat-present').innerText = present;
         document.getElementById('stat-absent').innerText = absent;
         document.getElementById('stat-late').innerText = late;
 
-        // بناء قائمة المجموعات المتاحة ديناميكياً للفلاتر
         const selectFilter = document.getElementById('groupFilter');
         selectFilter.innerHTML = '<option value="all">كل المجموعات</option>';
         groups.forEach(g => { if(g) selectFilter.innerHTML += `<option value="${g}">${g}</option>`; });
@@ -375,10 +376,13 @@
         renderTable(filtered);
     }
 
-    // ⚡ دالة رصد الحضور والاتصال ببوابة التعديل Apps Script البرمجية
+    // ⚡ دالة رصد الحضور الحية المرتبطة باسم المستخدم النشط في حقل الإعدادات
     function changeStatus(traineeId, traineeName, groupName, statusLabel) {
         const scriptUrl = localStorage.getItem('scriptUrl');
         if(!scriptUrl) { alert('يرجى تهيئة رابط البوابة البرمجية في قسم الإعدادات أولاً!'); return; }
+
+        // هنا تم ربط جلب اسم المستخدم من الـ Input المكتوب في الإعدادات بشكل مباشر وحي بدلاً من الاسم الثابت
+        const activeUser = document.getElementById('usernameInput').value.trim() || 'مشرف غير معرف';
 
         const payload = {
             action: "updateStatus",
@@ -387,7 +391,7 @@
             group: groupName,
             date: document.getElementById('attendanceDate').value,
             status: statusLabel,
-            username: localStorage.getItem('savedUsername') || 'المشرف المسؤول'
+            username: activeUser
         };
 
         fetch(scriptUrl, {
@@ -396,8 +400,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert(`📥 تم رصد [${traineeName}] كـ (${statusLabel}) بنجاح داخل شيت جوجل!`);
-            setTimeout(() => { loadTraineesData(); }, 1500); // تحديث سريع للبيانات
+            alert(`📥 تم رصد [${traineeName}] كـ (${statusLabel}) بواسطة [${activeUser}] بنجاح!`);
+            setTimeout(() => { loadTraineesData(); }, 1500); 
         }).catch(() => {
             alert('خطأ في إرسال حركة الحضور.');
         });
@@ -423,12 +427,14 @@
         const scriptUrl = localStorage.getItem('scriptUrl');
         if (!scriptUrl) { alert('يرجى حفظ رابط بوابة التعديل أولاً!'); return; }
         
+        const activeUser = document.getElementById('usernameInput').value.trim() || 'مشرف غير معرف';
+
         const payload = {
             action: "updateMaterial",
             dayNumber: document.getElementById('matDayNumber').value,
             materialDate: document.getElementById('matDate').value,
             content: document.getElementById('matContent').value.trim(),
-            username: localStorage.getItem('savedUsername') || 'المشرف المسؤول'
+            username: activeUser
         };
 
         fetch(scriptUrl, {
@@ -437,7 +443,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            alert('📥 تم حفظ وتحديث تفاصيل اليوم التدريبي الحالي في السيرفر!');
+            alert(`📥 تم حفظ وتحديث تفاصيل الحقيبة بواسطة [${activeUser}] في السيرفر!`);
             setTimeout(() => { loadMaterialTable(); }, 1500);
         });
     }
