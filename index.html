@@ -86,7 +86,6 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-card">
     <h2 style="margin-bottom: 20px; font-weight: 900; color: var(--accent);">🔐 تسجيل الدخول للنظام</h2>
@@ -103,10 +102,8 @@
   </div>
 </div>
 
-<!-- MAIN CONTAINER -->
 <div class="container" id="main-container">
 
-  <!-- SYSTEM HEADER -->
   <header>
     <div>
       <div class="logo">📊 لوحة الحضور الإدارية الذكية المتكاملة</div>
@@ -122,7 +119,6 @@
     </div>
   </header>
 
-  <!-- TABS NAV -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('dashboard')">📈 الإحصائيات الحالية اليومية</button>
     <button class="tab" onclick="switchTab('logs')">📋 السجل العام وإدارة الحالات</button>
@@ -131,7 +127,6 @@
     <button class="tab" id="tab-settings" onclick="switchTab('settings')">⚙️ الإعدادات والربط</button>
   </div>
 
-  <!-- PAGE: DASHBOARD -->
   <div id="page-dashboard" class="page active">
     <div class="grid-3">
       <div class="stat-card">
@@ -156,7 +151,7 @@
 
     <div class="grid-charts">
       <div class="card">
-        <div class="card-title">📊 توزيع الحضور للمجموعات التدريبية المعتمدة (انقر على أي جزء لعرض المتدربين)</div>
+        <div class="card-title">📊 توزيع الحضور للمجموعات التدريبية المعتمدة</div>
         <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px; align-items: center;">
           <div class="chart-container"><canvas id="groupPieChart"></canvas></div>
           <div style="background: var(--card2); padding: 12px; border-radius: 10px; max-height: 220px; overflow-y: auto;">
@@ -179,7 +174,6 @@
     </div>
   </div>
 
-  <!-- PAGE: LOGS -->
   <div id="page-logs" class="page">
     <div class="filter-panel">
       <div class="form-group">
@@ -207,7 +201,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title">📋 السجل العام الشامل (مرونة في قراءة الأعمدة الفورية للأكسل)</div>
+      <div class="card-title">📋 السجل العام الشامل</div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -227,7 +221,6 @@
     </div>
   </div>
 
-  <!-- PAGE: ABSENCE -->
   <div id="page-absence" class="page">
     <div class="card">
       <div class="card-title">🔍 نظام الفحص والكشف التلقائي الذكي عن الغائبين</div>
@@ -255,7 +248,6 @@
     </div>
   </div>
 
-  <!-- PAGE: MATERIAL -->
   <div id="page-material" class="page">
     <div class="material-layout">
       <div class="card" style="margin-bottom:0;">
@@ -283,7 +275,6 @@
           </div>
         </div>
 
-        <!-- التعديل المضاف: حقل كتابة وتعديل أسماء المدربين يدوياً قبل الحفظ والمزامنة السحابية -->
         <div class="form-group" style="margin-bottom:15px;">
           <label>👥 أسماء المدربين المسؤولين عن هذا اليوم (يمكن كتابة مدرب واحد أو أكثر يدوياً):</label>
           <input type="text" id="material-trainers-input" class="form-control" placeholder="مثال: أحمد، سارة، علي...">
@@ -291,7 +282,7 @@
 
         <div class="form-group" style="margin-bottom:15px;">
           <label>محتوى وتفاصيل المادة لليوم المحدد:</label>
-          <textarea id="material-editor" class="form-control" style="min-height:160px; font-size:1rem; line-height:1.6;" placeholder="اكتب تفاصيل المادة، المحاور، الأهداف، والجدول التدريبي هنا..."></textarea>
+          <textarea id="material-editor" class="form-control" style="min-height:160px; font-size:1rem; line-height:1.6;" placeholder="اكتب تفاصيل المادة هنا..."></textarea>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 15px;">
           <div id="material-audit-info" style="font-size:0.8rem; color:var(--muted);">آخر تعديل بواسطة: — في —</div>
@@ -299,7 +290,6 @@
         </div>
       </div>
 
-      <!-- جدول تفصيلي يعرض سجل إدخالات المدربين باليوم بالكامل وتفاعلي عند النقر -->
       <div class="sidebar-table-panel">
         <h4 style="font-size:0.9rem; font-weight:700; color:var(--accent); margin-bottom:10px;">📋 السجلات الحالية المدخلة من قِبل المدربين باليوم التفصيلي</h4>
         <div class="table-wrap">
@@ -322,7 +312,6 @@
     </div>
   </div>
 
-  <!-- PAGE: SETTINGS -->
   <div id="page-settings" class="page">
     <div class="card">
       <div class="card-title">⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين المعتمدين</div>
@@ -345,7 +334,7 @@
 const APPROVED_USERS = {
   "admin": "1234",
   "k.bobshan": "1234",
-  "أحمد": "safe2026",
+  "b.krier": "1234",
   "سارة": "pass2026"
 };
 
@@ -440,7 +429,7 @@ function switchTab(tabId) {
 // ==================== FETCH & PARSE DATA ====================
 function fetchCsvFromGoogleSheets() {
   if(!GOOGLE_CSV_URL) {
-    setConnectionStatus('danger', 'تنبيه: لم يتم ربط رابط ملف الـ CSV بعد في لوحة التحكم.');
+    setConnectionStatus('danger', 'تنبيه: لم يتم ربط رابط ملف الـ CSV بعد.');
     return;
   }
   setConnectionStatus('pending', 'جاري جلب البيانات من ملف الإكسل...');
@@ -461,7 +450,7 @@ function fetchCsvFromGoogleSheets() {
 function parseCsvToData(csvText) {
   const lines = csvText.split(/\r?\n/);
   if(lines.length < 2) {
-    document.getElementById('logs-table-body').innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--red)">⚠️ تنبيه: الملف فارغ أو لا يحتوي على أعمدة متطابقة!</td></tr>';
+    document.getElementById('logs-table-body').innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--red)">⚠️ تنبيه: الملف فارغ!</td></tr>';
     return;
   }
   
@@ -472,12 +461,12 @@ function parseCsvToData(csvText) {
   const headers = lines[0].split(',').map(h => h.replace(/["']/g, "").trim());
   
   let idxId = headers.findIndex(h => h.toLowerCase().includes('id') || h.includes('رقم') || h.includes('الأكاديمي'));
-  let idxName = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('اسم') || h.includes('الطالب'));
-  let idxGroup = headers.findIndex(h => h.toLowerCase().includes('group') || h.includes('مجموعة') || h.includes('الفئة'));
+  let idxName = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('اسم'));
+  let idxGroup = headers.findIndex(h => h.toLowerCase().includes('group') || h.includes('مجموعة'));
   let idxDate = headers.findIndex(h => h.toLowerCase().includes('date') || h.includes('تاريخ'));
   let idxTime = headers.findIndex(h => h.toLowerCase().includes('time') || h.includes('وقت'));
   let idxType = headers.findIndex(h => h.toLowerCase().includes('type') || h.includes('حركة') || h.includes('الحالة'));
-  let idxUser = headers.findIndex(h => h.includes('المعدل') || h.includes('المستخدم') || h.includes('user'));
+  let idxUser = headers.findIndex(h => h.includes('المعدل') || h.includes('المستخدم'));
 
   if(idxId === -1) idxId = 0; if(idxName === -1) idxName = 1; if(idxGroup === -1) idxGroup = 2;
   if(idxDate === -1) idxDate = 3; if(idxTime === -1) idxTime = 4; if(idxType === -1) idxType = 5;
@@ -637,7 +626,7 @@ function filterLogsData() {
 
   const tbody = document.getElementById('logs-table-body');
   if(FILTERED_DATA.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted)">لا توجد بيانات مطابقة للفلاتر الحالية</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted)">لا توجد بيانات مطابقة</td></tr>';
     return;
   }
 
@@ -703,7 +692,7 @@ function executeAbsenceCheck() {
   const absentList = SYSTEM_TRAINEES.filter(student => !presentStudentsToday.has(String(student.id).trim()));
 
   if(absentList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--green)">✅ حضور كامل بنسبة 100% ولا توجد غيابات في هذا التاريخ!</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--green)">✅ حضور كامل بنسبة 100%!</td></tr>';
     return;
   }
 
@@ -721,7 +710,7 @@ function executeAbsenceCheck() {
   `).join('');
 }
 
-// ==================== MATERIAL & SIDEBAR TABLE ENGINE ====================
+// ==================== MATERIAL ENGINE WITH REDIRECT FIX ====================
 function saveMaterialContent() {
   const txt = document.getElementById('material-editor').value;
   const selectedDay = document.getElementById('material-day-select').value;
@@ -747,7 +736,7 @@ function saveMaterialContent() {
       content: txt,
       dayNumber: selectedDay,
       materialDate: selectedDate,
-      username: trainersInput // إرسال الأسماء المكتوبة يدوياً في الخانة بدلاً من الاسم التلقائي
+      username: trainersInput
     })
   }).then(() => {
     alert(`✅ تم حفظ وتأكيد بيانات الحقيبة لـ (${selectedDay}) بنجاح.`);
@@ -761,21 +750,28 @@ function loadMaterialContent() {
   const selectedDay = document.getElementById('material-day-select').value;
   document.getElementById('material-audit-info').innerHTML = `🔄 جاري مزامنة بيانات ${selectedDay}...`;
 
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterial&dayNumber=${encodeURIComponent(selectedDay)}`)
+  // التحديث الأمني: استخدام GET والتعامل التلقائي مع التوجيه لتفادي مشاكل CORS الحظر
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterial&dayNumber=${encodeURIComponent(selectedDay)}`, {
+    method: "GET",
+    redirect: "follow"
+  })
   .then(res => res.json())
   .then(data => {
     if(data && data.materialDate) {
       document.getElementById('material-editor').value = data.content;
       document.getElementById('material-date-input').value = data.materialDate;
-      document.getElementById('material-trainers-input').value = data.username; // تعبئة خانة المدربين بالأسماء المسترجعة من الشيت
+      document.getElementById('material-trainers-input').value = data.username;
       document.getElementById('material-audit-info').innerHTML = `📝 المدربين المعتمدين لليوم: <strong style="color:var(--accent)">${data.username}</strong> | الإجراء: (${data.time})`;
     } else {
       document.getElementById('material-editor').value = "";
       document.getElementById('material-date-input').value = new Date().toISOString().split('T')[0];
-      document.getElementById('material-trainers-input').value = CURRENT_USER; // وضع اسم المستخدم الحالي كخيار افتراضي قابل للتعديل والمسح يدوياً
+      document.getElementById('material-trainers-input').value = CURRENT_USER;
       document.getElementById('material-audit-info').innerHTML = `💡 <span style="color:var(--green)">هذا اليوم (${selectedDay}) فارغ ومتاح للتعبئة التشاركية الآن.</span>`;
     }
-  }).catch(() => { document.getElementById('material-audit-info').innerHTML = `❌ خطأ بمزامنة محتوى اليوم.`; });
+  }).catch((err) => { 
+    console.error(err);
+    document.getElementById('material-audit-info').innerHTML = `❌ خطأ بمزامنة محتوى اليوم.`; 
+  });
 
   updateSidebarTableRecords();
 }
@@ -784,11 +780,14 @@ function updateSidebarTableRecords() {
   const tbody = document.getElementById('sidebar-table-records-body');
   if(!GOOGLE_SCRIPT_URL) return;
   
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterialList`)
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterialList`, {
+    method: "GET",
+    redirect: "follow"
+  })
   .then(res => res.json())
   .then(list => {
     if(!list || list.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted)">📭 لا توجد سجلات محفوظة ومدرجة للحقيبة التدريبية حتى الآن.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted)">📭 لا توجد سجلات محفوظة حتى الآن.</td></tr>';
       return;
     }
     
@@ -826,6 +825,7 @@ function saveSystemSettings() {
   
   alert("⚙️ تم حفظ الإعدادات بنجاح، جاري جلب البيانات المحدثة...");
   fetchCsvFromGoogleSheets();
+  loadMaterialContent();
 }
 </script>
 </body>
