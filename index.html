@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة تحكم المدرب الذكية | نظام الحضور والغياب المباشر</title>
+<title>النظام الإداري الذكي | لوحة التحكم والصلاحيات</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
@@ -22,189 +22,108 @@
     --border: rgba(0,212,255,0.15);
   }
 
+  body.theme-midnight { --bg: #0b132b; --card: #1c2541; --card2: #3a506b; }
+  body.theme-charcoal { --bg: #121212; --card: #1e1e1e; --card2: #2d2d2d; }
+  body.theme-forest { --bg: #0a0f0d; --card: #131c19; --card2: #1f2e29; }
+
   * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s; }
+  .container { max-width:1300px; margin:0 auto; padding:20px; display:none; }
+  
+  #login-screen { position: fixed; inset:0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; text-align: center; }
 
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content:'';
-    position:fixed;
-    inset:0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events:none;
-    z-index:0;
-  }
-
-  .container { position:relative; z-index:1; max-width:1300px; margin:0 auto; padding:20px; }
-
-  header {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:20px 0;
-    border-bottom:1px solid var(--border);
-    margin-bottom:25px;
-    flex-wrap:wrap;
-    gap:15px;
-  }
-  .logo {
-    font-size:1.6rem;
-    font-weight:900;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-  }
-  .status-bar {
-    display:flex;
-    align-items:center;
-    gap:15px;
-    background: var(--card);
-    padding:8px 16px;
-    border-radius:12px;
-    border: 1px solid var(--border);
-    font-size:0.85rem;
-  }
-  .status-indicator {
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-weight:700;
-  }
-  .status-dot {
-    width:10px; height:10px;
-    border-radius:50%;
-    background: var(--green);
-  }
-  .status-dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
-  .status-dot.offline { background: var(--red); }
-
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-
-  .tabs {
-    display:flex;
-    gap:10px;
-    margin-bottom:25px;
-    background:var(--card);
-    padding:6px;
-    border-radius:14px;
-    border:1px solid var(--border);
-    width:fit-content;
-  }
-  .tab {
-    padding:10px 24px;
-    border-radius:10px;
-    border:none;
-    background:transparent;
-    color:var(--muted);
-    font-family:'Cairo',sans-serif;
-    font-size:0.95rem;
-    font-weight:600;
-    cursor:pointer;
-    transition:all 0.2s;
-  }
-  .tab.active {
-    background:linear-gradient(135deg, var(--accent2), var(--accent));
-    color:#fff;
-    box-shadow:0 4px 15px rgba(0,102,255,0.4);
-  }
+  header { display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--border); margin-bottom:25px; flex-wrap:wrap; gap:15px; }
+  .logo { font-size:1.4rem; font-weight:900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  
+  .tabs { display:flex; gap:8px; margin-bottom:25px; background:var(--card); padding:6px; border-radius:14px; border:1px solid var(--border); width:fit-content; flex-wrap: wrap; }
+  .tab { padding:8px 20px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-family:'Cairo',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; }
+  .tab.active { background:linear-gradient(135deg, var(--accent2), var(--accent)); color:#fff; box-shadow:0 4px 15px rgba(0,102,255,0.3); }
 
   .page { display:none; }
   .page.active { display:block; }
-
   .grid-3 { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:15px; margin-bottom:25px; }
-  .grid-dash { display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:25px; }
   .grid-charts { display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:25px; }
-  
-  @media(max-width:900px){ .grid-dash, .grid-charts { grid-template-columns:1fr; } }
+  @media(max-width:900px){ .grid-charts { grid-template-columns:1fr; } }
 
-  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; position: relative; }
-  .card-title {
-    font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:18px;
-    display:flex; align-items:center; gap:8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:10px;
-  }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom: 20px; }
+  .card-title { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:15px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:8px; }
 
   .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; display:flex; align-items:center; justify-content:space-between; }
-  .stat-info .num { font-size:2.2rem; font-weight:900; line-height:1.1; }
-  .stat-info .lbl { font-size:0.8rem; color:var(--muted); font-weight:600; margin-top:5px; }
-  .stat-icon { font-size:2.2rem; opacity:0.3; }
+  .stat-info .num { font-size:2rem; font-weight:900; }
+  .stat-info .lbl { font-size:0.8rem; color:var(--muted); }
 
-  .group-box { background: var(--card2); border-radius:10px; padding:12px; margin-bottom:10px; border-right: 4px solid var(--accent); }
-  .group-box.g2 { border-right-color: var(--green); }
-  .group-box.g3 { border-right-color: var(--yellow); }
-  .group-flex { display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; }
-
-  .filter-panel {
-    background: var(--card); border: 1px solid var(--border); border-radius:14px; padding:15px; margin-bottom:20px;
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:end;
-  }
+  .filter-panel { background: var(--card); border: 1px solid var(--border); border-radius:14px; padding:15px; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; align-items:end; }
   .form-group { display:flex; flex-direction:column; gap:6px; }
-  .form-group label { font-size:0.8rem; color:var(--muted); font-weight:600; }
-  .form-control {
-    background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:8px 12px;
-    color:var(--text); font-family:'Cairo',sans-serif; font-size:0.85rem; outline:none; width: 100%;
-  }
-  .form-control:focus { border-color:var(--accent); }
+  .form-group label { font-size:0.8rem; color:var(--muted); }
+  .form-control { background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Cairo',sans-serif; font-size:0.85rem; outline:none; width: 100%; }
 
-  .btn {
-    display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 18px;
-    border-radius:8px; border:none; font-family:'Cairo',sans-serif; font-size:0.88rem; font-weight:700; cursor:pointer; transition:all 0.2s;
-  }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; border-radius:8px; border:none; font-family:'Cairo',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; }
   .btn-primary { background:linear-gradient(135deg, var(--accent2), var(--accent)); color:#fff; }
-  .btn-success { background:rgba(0,230,118,0.15); color:var(--green); border:1px solid rgba(0,230,118,0.3); }
-  .btn-danger { background:rgba(255,68,68,0.12); color:var(--red); border:1px solid rgba(255,68,68,0.25); }
   .btn-ghost { background:var(--card2); color:var(--text); border:1px solid var(--border); }
-  .btn:hover { transform:translateY(-1px); opacity:0.9; }
-
+  
   .table-wrap { overflow-x:auto; width:100%; }
   table { width:100%; border-collapse:collapse; font-size:0.85rem; text-align:right; }
-  th { background:var(--card2); color:var(--muted); font-weight:700; padding:12px; font-size:0.8rem; border-bottom:1px solid var(--border); }
-  td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); vertical-align:middle; }
-  tr:hover td { background:rgba(0,212,255,0.02); }
+  th { background:var(--card2); color:var(--muted); padding:12px; border-bottom:1px solid var(--border); }
+  td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
 
-  .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+  .badge { padding:3px 8px; border-radius:20px; font-size:0.75rem; font-weight:700; display:inline-block; }
   .badge-green { background:rgba(0,230,118,0.15); color:var(--green); }
-  .badge-red   { background:rgba(255,68,68,0.15);  color:var(--red);   }
+  .badge-red { background:rgba(255,68,68,0.15); color:var(--red); }
+  .badge-yellow { background:rgba(255,214,0,0.15); color:var(--yellow); }
 
-  .activity-stream { max-height: 380px; overflow-y: auto; }
-  .activity-item { padding:10px; border-bottom:1px solid rgba(255,255,255,0.03); font-size:0.82rem; display:flex; justify-content:space-between; align-items:center; }
-  .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:0.9rem; width: 100%; }
-
+  .status-select { background: var(--card2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px; font-family: 'Cairo'; font-size: 0.8rem; }
+  .audit-text { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 2px; }
   .chart-container { position: relative; height: 220px; width: 100%; }
+
+  /* تنسيق تخطيط لوحة الحقيبة المتقدمة (Sidebar layout) */
+  .material-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+  @media(max-width: 850px){ .material-layout { grid-template-columns: 1fr; } }
+  .sidebar-panel { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 15px; max-height: 520px; overflow-y: auto; }
+  .sidebar-item { background: var(--card); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+  .sidebar-item:hover { border-color: var(--accent); background: rgba(0,212,255,0.05); }
+  .sidebar-item .day-title { font-weight: 700; color: var(--accent); font-size: 0.85rem; display: flex; justify-content: space-between; }
+  .sidebar-item .meta-desc { font-size: 0.75rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="login-screen">
+  <div class="login-card">
+    <h2 style="margin-bottom: 20px; font-weight: 900; color: var(--accent);">🔐 تسجيل الدخول للنظام</h2>
+    <div class="form-group" style="margin-bottom: 15px; text-align: right;">
+      <label>اسم المستخدم</label>
+      <input type="text" id="login-user" class="form-control" placeholder="أدخل اسم المستخدم...">
+    </div>
+    <div class="form-group" style="margin-bottom: 25px; text-align: right;">
+      <label>كلمة المرور</label>
+      <input type="password" id="login-pass" class="form-control" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="handleLogin()">دخول لوحة التحكم</button>
+    <p id="login-err" style="color: var(--red); font-size: 0.85rem; margin-top: 15px; display: none;">❌ اسم المستخدم أو كلمة المرور غير صحيحة!</p>
+  </div>
+</div>
+
+<div class="container" id="main-container">
 
   <header>
-    <div class="logo">📊 لوحة تحكم الحضور الذكية (Google Sheets)</div>
-    <div class="status-bar">
-      <div class="status-indicator">
-        <div class="status-dot" id="net-dot"></div>
-        <span id="net-text">جاري الاتصال بجوجل شيت...</span>
-      </div>
-      <div style="color:var(--muted)">|</div>
-      <div>التحديث التلقائي: <span id="timer-val" style="color:var(--accent); font-weight:700;">60</span> ثانية</div>
-      <div style="color:var(--muted)">|</div>
-      <div>آخر مزامنة: <span id="last-sync-text" style="color:var(--muted)">—</span></div>
-      <button class="btn btn-ghost" style="padding:4px 10px; font-size:0.75rem;" onclick="fetchCsvFromGoogleSheets()">🔄 تحديث الآن</button>
+    <div>
+      <div class="logo">📊 لوحة الحضور الإدارية الذكية المتكاملة</div>
+      <div style="font-size:0.8rem; color: var(--muted); margin-top: 4px;">المستخدم الحالي: <strong id="current-user-display" style="color:var(--accent)">—</strong></div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn btn-ghost" onclick="toggleDarkBackgrounds()">🎨 تغيير درجة الخلفية</button>
+      <button class="btn btn-ghost" onclick="fetchCsvFromGoogleSheets()">🔄 تحديث فوري</button>
+      <button class="btn btn-primary" style="background:var(--red);" onclick="handleLogout()">🚪 خروج</button>
     </div>
   </header>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('dashboard')">📈 المؤشرات الإحصائية والرسوم</button>
-    <button class="tab" onclick="switchTab('logs')">📋 سجل النشاطات والفلاتر المتقدمة</button>
+    <button class="tab active" onclick="switchTab('dashboard')">📈 الإحصائيات الحالية اليومية</button>
+    <button class="tab" onclick="switchTab('logs')">📋 السجل العام وإدارة الحالات</button>
     <button class="tab" onclick="switchTab('absence')">📊 شاشة كشف الغياب التلقائي</button>
-    <button class="tab" onclick="switchTab('settings')">⚙️ الإعدادات</button>
+    <button class="tab" onclick="switchTab('material')">📚 تفاصيل الحقيبة والمادة التدريبية</button>
+    <button class="tab" onclick="switchTab('settings')">⚙️ الإعدادات والربط</button>
   </div>
 
   <div id="page-dashboard" class="page active">
@@ -212,49 +131,31 @@
       <div class="stat-card">
         <div class="stat-info">
           <div class="num" id="st-total-records" style="color:var(--accent)">0</div>
-          <div class="lbl">إجمالي الحركات الكلية المسجلة</div>
+          <div class="lbl">إجمالي الحركات الكلية المستلمة</div>
         </div>
-        <div class="stat-icon">📥</div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
           <div class="num" id="st-unique-trainees" style="color:var(--green)">0</div>
-          <div class="lbl">عدد المتدربين الفريدين المكتشفين</div>
+          <div class="lbl">عدد المتدربين الفريدين المسجلين</div>
         </div>
-        <div class="stat-icon">👥</div>
       </div>
       <div class="stat-card">
         <div class="stat-info">
           <div class="num" id="st-today-count" style="color:var(--yellow)">0</div>
-          <div class="lbl">إجمالي الحاضرين اليوم الحقيقي</div>
+          <div class="lbl">إجمالي الحاضرين الفعليين اليوم</div>
         </div>
-        <div class="stat-icon">📅</div>
       </div>
     </div>
 
     <div class="grid-charts">
       <div class="card">
-        <div class="card-title">📊 توزيع الحضور للمجموعات التدريبية</div>
-        <div class="chart-container">
-          <canvas id="groupPieChart"></canvas>
-        </div>
+        <div class="card-title">📊 توزيع الحضور للمجموعات التدريبية المعتمدة</div>
+        <div class="chart-container"><canvas id="groupPieChart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">📈 منحنى حركات تسجيل الحضور اليومي</div>
-        <div class="chart-container">
-          <canvas id="dailyLineChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid-dash">
-      <div class="card">
-        <div class="card-title">👥 نسب حضور المجموعات المكتشفة تلقائياً</div>
-        <div id="groups-summary-area"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">⚡ آخر 6 نشاطات تم تسجيلها</div>
-        <div class="activity-stream" id="activity-stream-box"></div>
+        <div class="card-title">📈 منحنى وتوزيع حركات الحضور (لتاريخ اليوم الحالي فقط)</div>
+        <div class="chart-container"><canvas id="dailyLineChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -263,46 +164,41 @@
     <div class="filter-panel">
       <div class="form-group">
         <label>🔍 بحث بالاسم أو الـ Training ID</label>
-        <input type="text" id="flt-search" class="form-control" placeholder="اكتب الاسم أو الـ ID هنا..." oninput="filterLogsData()">
+        <input type="text" id="flt-search" class="form-control" placeholder="اكتب للبحث..." oninput="filterLogsData()">
       </div>
       <div class="form-group">
         <label>👥 تصفية حسب المجموعة</label>
-        <select id="flt-group" class="form-control" onchange="filterLogsData()">
-          <option value="ALL">كل المجموعات</option>
-        </select>
+        <select id="flt-group" class="form-control" onchange="filterLogsData()"><option value="ALL">كل المجموعات</option></select>
       </div>
       <div class="form-group">
-        <label>🟢 الحركة</label>
+        <label>🟢 الحالة</label>
         <select id="flt-type" class="form-control" onchange="filterLogsData()">
-          <option value="ALL">الكل (حضور / انصراف)</option>
+          <option value="ALL">الكل</option>
           <option value="حضور">حضور</option>
           <option value="انصراف">انصراف</option>
+          <option value="تأخير">تأخير</option>
+          <option value="غياب">غياب</option>
         </select>
       </div>
       <div class="form-group">
         <label>📅 التاريخ</label>
         <input type="date" id="flt-date" class="form-control" onchange="filterLogsData()">
       </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-success" onclick="exportFilteredToExcel()">📥 تصدير المفلتر لـ Excel</button>
-        <button class="btn btn-ghost" onclick="resetFilters()">🔄 إعادة ضبط</button>
-      </div>
     </div>
 
     <div class="card">
-      <div class="card-title">📋 الجدول الشامل للبيانات المفلترة من جوجل شيت</div>
+      <div class="card-title">📋 السجل العام الشامل (تعديل حالة متدرب ينعكس في شيت جوجل فوراً)</div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Training ID</th>
-              <th>اسم المتدرب</th>
+              <th>ID</th>
+              <th>اسم المتدرب الكامل</th>
               <th>المجموعة</th>
               <th>التاريخ</th>
               <th>الوقت</th>
-              <th>نوع الحركة</th>
-              <th>المسافة المعيارية</th>
+              <th>نوع الحركة والإدارة</th>
+              <th>المعدل بواسطة</th>
             </tr>
           </thead>
           <tbody id="logs-table-body"></tbody>
@@ -312,103 +208,172 @@
   </div>
 
   <div id="page-absence" class="page">
-    <div class="card" style="margin-bottom:20px;">
-      <div class="card-title">🔍 نظام كشف واستخراج الغياب التلقائي حسب التاريخ</div>
-      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:15px;">
-        يعمل النظام على حصر كل من تم العثور على بياناته في ملف جوجل شيت كمتدرب معتمد، ويقارنه مع من قام بتسجيل حركة "حضور" في اليوم المحدد ليظهر لك الغائبين فوراً.
-      </p>
-      
-      <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; background:var(--card2); padding:15px; border-radius:10px;">
+    <div class="card">
+      <div class="card-title">🔍 نظام الفحص والكشف التلقائي الذكي عن الغائبين</div>
+      <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; background:var(--card2); padding:15px; border-radius:10px; margin-bottom:15px;">
         <div class="form-group" style="min-width:220px;">
-          <label>📅 اختر تاريخ الفحص والمقارنة</label>
-          <input type="date" id="absence-check-date" class="form-control" onchange="executeAbsenceCheck()">
+          <label>📅 اختر تاريخ الفحص والمقارنة بدقة</label>
+          <input type="date" id="absence-check-date" class="form-control">
         </div>
-        <div style="margin-top:20px; display:flex; gap:10px;">
-          <button class="btn btn-primary" onclick="executeAbsenceCheck()">🔍 بدء الفحص التلقائي</button>
-          <button class="btn btn-danger" onclick="exportAbsenceToExcel()">📥 تصدير كشف الغائبين فقط</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid-charts" style="grid-template-columns: 1fr 2fr;">
-      <div class="card">
-        <div class="card-title">📊 خلاصة الفحص لليوم المحدد</div>
-        <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
-          <div style="background:var(--card2); padding:12px; border-radius:10px; text-align:center;">
-            <div id="abs-stat-total" style="font-size:1.8rem; font-weight:900; color:var(--accent);">0</div>
-            <div style="font-size:0.75rem; color:var(--muted);">إجمالي المتدربين الفريدين بالنظام</div>
-          </div>
-          <div style="background:rgba(0,230,118,0.08); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(0,230,118,0.2);">
-            <div id="abs-stat-present" style="font-size:1.8rem; font-weight:900; color:var(--green);">0</div>
-            <div style="font-size:0.75rem; color:var(--green);">من سجلوا حضور في هذا اليوم</div>
-          </div>
-          <div style="background:rgba(255,68,68,0.08); padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(255,68,68,0.2);">
-            <div id="abs-stat-absent" style="font-size:1.8rem; font-weight:900; color:var(--red);">0</div>
-            <div style="font-size:0.75rem; color:var(--red);">الغائبين التلقائيين المتبقيين</div>
-          </div>
-        </div>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="executeAbsenceCheck()">🔍 بدء الفحص التلقائي المطور</button>
       </div>
 
-      <div class="card">
-        <div class="card-title">❌ قائمة المتدربين الغائبين المكتشفين لليوم المحدد</div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Training ID</th>
-                <th>اسم المتدرب</th>
-                <th>المجموعة</th>
-                <th>الحالة الافتراضية</th>
-              </tr>
-            </thead>
-            <tbody id="absence-table-body"></tbody>
-          </table>
-        </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Training ID</th>
+              <th>اسم المتدرب كاملاً</th>
+              <th>المجموعة التدريبية</th>
+              <th>الحالة التلقائية المكتشفة</th>
+              <th>تحويل الحالة فوراً</th>
+            </tr>
+          </thead>
+          <tbody id="absence-table-body"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
+  <div id="page-material" class="page">
+    <div class="material-layout">
+      
+      <div class="sidebar-panel">
+        <h4 style="font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border);">📝 السجلات الحالية باليوم</h4>
+        <div id="sidebar-records-container">
+          <div style="text-align:center; color:var(--muted); font-size:0.8rem; padding:20px;">جاري تحميل القائمة...</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-title">📚 تفاصيل وإدارة محتوى الحقيبة التدريبية اليومية</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div class="form-group">
+            <label>📅 حدد اليوم التدريبي الحالي للتعديل/الإضافة:</label>
+            <select id="material-day-select" class="form-control">
+              <option value="اليوم الأول">اليوم الأول 1</option>
+              <option value="اليوم الثاني">اليوم الثاني 2</option>
+              <option value="اليوم الثالث">اليوم الثالث 3</option>
+              <option value="اليوم الرابع">اليوم الرابع 4</option>
+              <option value="اليوم الخامس">اليوم الخامس 5</option>
+              <option value="اليوم السادس">اليوم السادس 6</option>
+              <option value="اليوم السابع">اليوم السابع 7</option>
+              <option value="اليوم الثامن">اليوم الثامن 8</option>
+              <option value="اليوم التاسع">اليوم التاسع 9</option>
+              <option value="اليوم العاشر">اليوم العاشر 10</option>
+              <option value="اليوم العاشر">اليوم العاشر 11</option>
+              <option value="اليوم العاشر">اليوم العاشر 12</option>
+              <option value="اليوم العاشر">اليوم العاشر 13</option>
+              <option value="اليوم العاشر">اليوم العاشر 14</option>
+              <option value="اليوم العاشر">اليوم العاشر 15</option>
+              <option value="اليوم العاشر">اليوم العاشر 16</option>
+              <option value="اليوم العاشر">اليوم العاشر 17</option>
+              <option value="اليوم العاشر">اليوم العاشر 18</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;📆 تاريخ هذا اليوم التدريبي:</label>
+            <input type="date" id="material-date-input" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+          <label>محتوى وتفاصيل المادة لليوم المحدد:</label>
+          <textarea id="material-editor" class="form-control" style="min-height:220px; font-size:1rem; line-height:1.6;" placeholder="اكتب تفاصيل المادة، المحاور، الأهداف، والجدول التدريبي هنا..."></textarea>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div id="material-audit-info" style="font-size:0.8rem; color:var(--muted);">آخر تعديل بواسطة: — في —</div>
+          <button class="btn btn-primary" onclick="saveMaterialContent()">💾 حفظ التعديلات وإرسالها للإكسل</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div id="page-settings" class="page">
-    <div class="card" style="max-width:700px; margin:0 auto;">
-      <div class="card-title">⚙️ رابط مصدر البيانات الافتراضي (Google Sheets CSV Link)</div>
+    <div class="card">
+      <div class="card-title">⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين المعتمدين</div>
       <div class="form-group" style="margin-bottom:15px;">
-        <label>رابط التصدير الفوري المباشر الحالي:</label>
-        <input type="text" id="cfg-csv-url" class="form-control" style="font-size:0.8rem;" placeholder="ضع رابط CSV هنا...">
+        <label>1. رابط جوجل شيت المباشر (CSV Link):</label>
+        <input type="text" id="cfg-csv-url" class="form-control">
       </div>
-      <div style="display:flex; justify-content:flex-end;">
-        <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الرابط الجديد واعادة المزامنة</button>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>2. رابط بوابة التعديل البرمجية الذكية (Google Apps Script Web App URL):</label>
+        <input type="text" id="cfg-script-url" class="form-control">
       </div>
+      <button class="btn btn-primary" onclick="saveSystemSettings()">💾 حفظ إعدادات التهيئة والربط</button>
     </div>
   </div>
 
 </div>
 
 <script>
-// ==================== STATE & CONFIG ====================
+// ==================== CONFIG & USERS LIST ====================
+const APPROVED_USERS = {
+  "admin": "1234",
+  "trainer1": "pass1",
+  "أحمد": "safe2026",
+  "سارة": "pass2026"
+};
+
 let GOOGLE_CSV_URL = localStorage.getItem('dash_google_csv') || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ7oboudTsfqeW4IflcLUg8FMRJpzMA2Umj_afcQIjLfRmrbAhotbmfeNuvmli_fg_QMUkKxiqtfQK/pub?gid=720402532&single=true&output=csv';
+let GOOGLE_SCRIPT_URL = localStorage.getItem('dash_script_url') || 'https://script.google.com/macros/s/AKfycbxhYotI8jCptoz6RtWiTOBO_eeS_RzTUqktkmh15Qx70VZoXeW0zm6r9j01pYPOKvXP/exec';
 
 let SERVER_DATA = [];
 let SYSTEM_TRAINEES = [];
 let FILTERED_DATA = [];
-let ABSENT_LIST = [];
 let SYSTEM_GROUPS = new Set();
-let timerCount = 60;
-let timerInterval = null;
+let CURRENT_USER = "";
+let BACKGROUND_THEMES = ['default', 'theme-midnight', 'theme-charcoal', 'theme-forest'];
+let currentThemeIdx = 0;
+
 let chartPie = null;
 let chartLine = null;
 
-window.onload = () => {
-  document.getElementById('cfg-csv-url').value = GOOGLE_CSV_URL;
+// ==================== AUTHENTICATION ENGINE ====================
+function handleLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
   
-  // ضبط التواريخ الافتراضية لليوم الحالي بتوقيت النظام المحلي
+  if (APPROVED_USERS[u] && APPROVED_USERS[u] === p) {
+    CURRENT_USER = u;
+    document.getElementById('current-user-display').textContent = CURRENT_USER;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-container').style.display = 'block';
+    initSystem();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function handleLogout() {
+  CURRENT_USER = "";
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-container').style.display = 'none';
+}
+
+function toggleDarkBackgrounds() {
+  document.body.classList.remove(...BACKGROUND_THEMES);
+  currentThemeIdx = (currentThemeIdx + 1) % BACKGROUND_THEMES.length;
+  if(BACKGROUND_THEMES[currentThemeIdx] !== 'default') {
+    document.body.classList.add(BACKGROUND_THEMES[currentThemeIdx]);
+  }
+}
+
+// ==================== INITIALIZATION ====================
+function initSystem() {
+  document.getElementById('cfg-csv-url').value = GOOGLE_CSV_URL;
+  document.getElementById('cfg-script-url').value = GOOGLE_SCRIPT_URL;
+  
   const todayIso = new Date().toISOString().split('T')[0];
   document.getElementById('absence-check-date').value = todayIso;
   document.getElementById('flt-date').value = todayIso;
+  document.getElementById('material-date-input').value = todayIso;
   
   fetchCsvFromGoogleSheets();
-  startCountdownTimer();
-};
+  loadMaterialContent();
+}
 
 function switchTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -421,40 +386,13 @@ function switchTab(tabId) {
   if(tabId === 'dashboard') renderDashboardCharts();
 }
 
-// ==================== CORE DATA FETCHING (CSV PARSER) ====================
-function startCountdownTimer() {
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timerCount--;
-    document.getElementById('timer-val').textContent = timerCount;
-    if(timerCount <= 0) fetchCsvFromGoogleSheets();
-  }, 1000);
-}
-
+// ==================== FETCH & PARSE DATA ====================
 function fetchCsvFromGoogleSheets() {
-  timerCount = 60;
-  const dot = document.getElementById('net-dot');
-  const txt = document.getElementById('net-text');
-  dot.className = "status-dot loading";
-  txt.textContent = "جاري سحب البيانات المباشرة من ملف الشيت الحالية...";
-
   fetch(GOOGLE_CSV_URL)
-  .then(response => {
-    if (!response.ok) throw new Error('Network error');
-    return response.text();
-  })
+  .then(res => res.text())
   .then(csvText => {
     parseCsvToData(csvText);
-    
-    dot.className = "status-dot";
-    txt.textContent = "متصل ومزامن مباشرة مع Google Sheets CSV";
-    document.getElementById('last-sync-text').textContent = new Date().toLocaleTimeString('ar-SA');
-  })
-  .catch(error => {
-    console.error('Error fetching CSV:', error);
-    dot.className = "status-dot offline";
-    txt.textContent = "فشل الاتصال! يرجى التحقق من الرابط في الإعدادات";
-  });
+  }).catch(err => console.error("خطأ بمزامنة البيانات: ", err));
 }
 
 function parseCsvToData(csvText) {
@@ -465,33 +403,23 @@ function parseCsvToData(csvText) {
   let tempTraineesMap = new Map();
   SYSTEM_GROUPS.clear();
 
-  // فحص السطر الأول لمعرفة ترتيب الأعمدة تلقائياً لمنع أي مشاكل
   const headers = lines[0].split(',').map(h => h.replace(/["']/g, "").trim());
   
-  let idxId = headers.findIndex(h => h.toLowerCase().includes('id') || h.includes('رقم') || h.includes('المعرف'));
-  let idxName = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('اسم') || h.includes('المتدرب'));
-  let idxGroup = headers.findIndex(h => h.toLowerCase().includes('group') || h.includes('مجموعة') || h.includes('المجموعة'));
-  let idxDate = headers.findIndex(h => h.toLowerCase().includes('date') || h.includes('تاريخ') || h.includes('التاريخ'));
-  let idxTime = headers.findIndex(h => h.toLowerCase().includes('time') || h.includes('وقت') || h.includes('الوقت'));
-  let idxType = headers.findIndex(h => h.toLowerCase().includes('type') || h.includes('حركة') || h.includes('النوع'));
-  let idxDist = headers.findIndex(h => h.toLowerCase().includes('dist') || h.includes('مسافة') || h.includes('المسافة'));
+  let idxId = headers.findIndex(h => h.toLowerCase().includes('id') || h.includes('رقم'));
+  let idxName = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('اسم'));
+  let idxGroup = headers.findIndex(h => h.toLowerCase().includes('group') || h.includes('مجموعة'));
+  let idxDate = headers.findIndex(h => h.toLowerCase().includes('date') || h.includes('تاريخ'));
+  let idxTime = headers.findIndex(h => h.toLowerCase().includes('time') || h.includes('وقت'));
+  let idxType = headers.findIndex(h => h.toLowerCase().includes('type') || h.includes('حركة'));
+  let idxUser = headers.findIndex(h => h.includes('المعدل') || h.includes('المستخدم') || h.includes('user'));
 
-  // قيم افتراضية احتياطية في حال تعذر المطابقة التلقائية لأسماء الأعمدة
-  if(idxId === -1) idxId = 0;
-  if(idxName === -1) idxName = 1;
-  if(idxGroup === -1) idxGroup = 2;
-  if(idxDate === -1) idxDate = 3;
-  if(idxTime === -1) idxTime = 4;
-  if(idxType === -1) idxType = 5;
-  if(idxDist === -1) idxDist = 6;
+  if(idxId === -1) idxId = 0; if(idxName === -1) idxName = 1; if(idxGroup === -1) idxGroup = 2;
+  if(idxDate === -1) idxDate = 3; if(idxTime === -1) idxTime = 4; if(idxType === -1) idxType = 5;
 
   for(let i = 1; i < lines.length; i++) {
     if(!lines[i].trim()) continue;
-    
-    // التعامل الذكي مع الفواصل داخل خلايا الـ CSV
-    let columns = [];
     let matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-    columns = matches.map(c => c.replace(/["']/g, "").trim());
+    let columns = matches.map(c => c.replace(/["']/g, "").trim());
 
     if(columns.length < 2) continue;
 
@@ -499,15 +427,14 @@ function parseCsvToData(csvText) {
       id: columns[idxId] || '',
       name: columns[idxName] || '',
       group: columns[idxGroup] || 'المجموعة العامة',
-      date: (columns[idxDate] || '').replace(/\//g, '-'), // توحيد شكل التواريخ
+      date: (columns[idxDate] || '').replace(/\//g, '-'),
       time: columns[idxTime] || '',
       type: columns[idxType] || 'حضور',
-      dist: columns[idxDist] || '—'
+      changedBy: idxUser !== -1 ? (columns[idxUser] || 'تلقائي للشيت') : 'تلقائي للشيت'
     };
 
     tempRecords.push(rec);
 
-    // بناء قائمة المتدربين الفريدين المعتمدين من البيانات (التحسين رقم 11)
     if(rec.id && !tempTraineesMap.has(rec.id)) {
       tempTraineesMap.set(rec.id, { id: rec.id, name: rec.name, group: rec.group });
     }
@@ -517,115 +444,43 @@ function parseCsvToData(csvText) {
   SERVER_DATA = tempRecords;
   SYSTEM_TRAINEES = Array.from(tempTraineesMap.values());
 
-  // تحديث قائمة فلاتر المجموعات المتاحة ديناميكياً
-  updateGroupDropdowns();
-  
-  // معالجة وتحديث كافة البيانات في شاشات لوحة التحكم
-  updateGlobalAnalytics();
+  const select = document.getElementById('flt-group');
+  select.innerHTML = '<option value="ALL">كل المجموعات</option>';
+  SYSTEM_GROUPS.forEach(g => select.innerHTML += `<option value="${g}">${g}</option>`);
+
+  updateAnalyticsAndCounters();
   filterLogsData();
   executeAbsenceCheck();
-  renderLiveRecentActivities();
   renderDashboardCharts();
-  renderGroupBreakdownSection();
 }
 
-// ==================== ANALYTICS & BREAKDOWN ====================
-function updateGroupDropdowns() {
-  const select = document.getElementById('flt-group');
-  const savedVal = select.value;
-  select.innerHTML = '<option value="ALL">كل المجموعات المكتشفة</option>';
-  SYSTEM_GROUPS.forEach(g => {
-    select.innerHTML += `<option value="${g}">${g}</option>`;
-  });
-  if(Array.from(SYSTEM_GROUPS).includes(savedVal)) select.value = savedVal;
-}
-
-function updateGlobalAnalytics() {
+function updateAnalyticsAndCounters() {
   document.getElementById('st-total-records').textContent = SERVER_DATA.length;
   document.getElementById('st-unique-trainees').textContent = SYSTEM_TRAINEES.length;
   
-  // حساب حضور اليوم التلقائي
   const localTodayStr = new Date().toISOString().split('T')[0];
   const formattedToday = new Date().toLocaleDateString('ar-SA').replace(/\//g, '-');
-  const todayPresent = SERVER_DATA.filter(r => (r.date === localTodayStr || r.date === formattedToday) && r.type === "حضور").length;
+  const todayPresent = SERVER_DATA.filter(r => (r.date === localTodayStr || r.date === formattedToday) && (r.type === "حضور" || r.type === "تأخير")).length;
   
   document.getElementById('st-today-count').textContent = todayPresent;
 }
 
-function renderLiveRecentActivities() {
-  const container = document.getElementById('activity-stream-box');
-  const recentItems = SERVER_DATA.slice(-6).reverse(); // جلب آخر 6 صفوف مضافة أسفل الشيت
-  
-  if(recentItems.length === 0) {
-    container.innerHTML = '<div class="empty-state">لا توجد حركات حضور مسجلة حالياً بالشيت</div>';
-    return;
-  }
-  
-  container.innerHTML = recentItems.map(r => `
-    <div class="activity-item">
-      <div>
-        <strong>${r.name}</strong> <span style="color:var(--muted); font-size:0.75rem;">(${r.group})</span>
-      </div>
-      <div>
-        <span class="badge ${r.type==='حضور'?'badge-green':'badge-red'}">${r.type}</span>
-        <span style="color:var(--accent); font-size:0.75rem; margin-right:6px;">${r.time}</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderGroupBreakdownSection() {
-  const container = document.getElementById('groups-summary-area');
-  if(SYSTEM_GROUPS.size === 0) {
-    container.innerHTML = '<div class="empty-state">لا توجد مجموعات مسجلة بعد</div>';
-    return;
-  }
-
-  const localTodayStr = new Date().toISOString().split('T')[0];
-  const formattedToday = new Date().toLocaleDateString('ar-SA').replace(/\//g, '-');
-
-  container.innerHTML = Array.from(SYSTEM_GROUPS).map((g, idx) => {
-    const totalInGroup = SYSTEM_TRAINEES.filter(t => t.group === g).length;
-    const presentToday = SERVER_DATA.filter(r => r.group === g && (r.date === localTodayStr || r.date === formattedToday) && r.type === "حضور").length;
-    const ratio = totalInGroup > 0 ? Math.round((presentToday / totalInGroup) * 100) : 0;
-    
-    return `
-      <div class="group-box ${idx%3===1?'g2':idx%3===2?'g3':''}">
-        <div class="group-flex">
-          <strong>${g}</strong>
-          <span style="color:var(--muted)">المتدربين الكليين بالجروب: <strong style="color:var(--text)">${totalInGroup}</strong></span>
-        </div>
-        <div class="group-flex" style="margin-top:8px;">
-          <span style="color:var(--muted)">الحضور المكتشف اليوم: <span class="badge badge-green">${presentToday} متدرب</span></span>
-          <span style="font-weight:900; color:var(--accent)">نسبة انضباط اليوم: ${ratio}%</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// ==================== GRAPHICS GENERATORS (CHART.JS) ====================
+// ==================== CHARTS ENGINE ====================
 function renderDashboardCharts() {
   const localTodayStr = new Date().toISOString().split('T')[0];
   const formattedToday = new Date().toLocaleDateString('ar-SA').replace(/\//g, '-');
 
-  // تجميع المجموعات للرسم الدائري
   let pieLabels = Array.from(SYSTEM_GROUPS);
   let pieCounts = pieLabels.map(g => {
-    return SERVER_DATA.filter(r => r.group === g && (r.date === localTodayStr || r.date === formattedToday) && r.type === "حضور").length;
+    return SERVER_DATA.filter(r => r.group === g && (r.date === localTodayStr || r.date === formattedToday) && (r.type === "حضور" || r.type === "تأخير")).length;
   });
 
   if(chartPie) chartPie.destroy();
-  const ctxPie = document.getElementById('groupPieChart').getContext('2d');
-  chartPie = new Chart(ctxPie, {
+  chartPie = new Chart(document.getElementById('groupPieChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-      labels: pieLabels.length > 0 ? pieLabels : ['لا يوجد بيانات'],
-      datasets: [{
-        data: pieCounts.length > 0 ? pieCounts : [0],
-        backgroundColor: ['#00d4ff', '#00e676', '#ffd600', '#ff4444', '#a855f7'],
-        borderWidth: 0
-      }]
+      labels: pieLabels,
+      datasets: [{ data: pieCounts, backgroundColor: ['#00d4ff', '#00e676', '#ffd600', '#ff4444', '#a855f7'], borderWidth: 0 }]
     },
     options: {
       responsive: true,
@@ -634,94 +489,107 @@ function renderDashboardCharts() {
     }
   });
 
-  // تجميع الخط الزمني لآخر 7 أيام
-  let dailyMap = {};
-  SERVER_DATA.filter(r => r.type === "حضور").forEach(r => {
-    if(r.date) dailyMap[r.date] = (dailyMap[r.date] || 0) + 1;
+  let hoursMap = {};
+  for(let h=8; h<=17; h++) hoursMap[`${h}:00`] = 0;
+
+  SERVER_DATA.filter(r => (r.date === localTodayStr || r.date === formattedToday) && (r.type === "حضور" || r.type === "تأخير")).forEach(r => {
+    if(r.time) {
+      let part = r.time.split(':');
+      let hourStr = parseInt(part[0]) + ":00";
+      if(hoursMap[hourStr] !== undefined) hoursMap[hourStr]++;
+    }
   });
 
-  let lineLabels = Object.keys(dailyMap).sort().slice(-7);
-  let lineData = lineLabels.map(d => dailyMap[d]);
-
   if(chartLine) chartLine.destroy();
-  const ctxLine = document.getElementById('dailyLineChart').getContext('2d');
-  chartLine = new Chart(ctxLine, {
+  chartLine = new Chart(document.getElementById('dailyLineChart').getContext('2d'), {
     type: 'line',
     data: {
-      labels: lineLabels.length > 0 ? lineLabels : ['لا يوجد تواريخ'],
+      labels: Object.keys(hoursMap),
       datasets: [{
-        label: 'حركات الحضور المستلمة',
-        data: lineData.length > 0 ? lineData : [0],
+        label: 'حركات الحضور المستلمة حسب الساعات اليوم',
+        data: Object.values(hoursMap),
         borderColor: '#0066ff',
         backgroundColor: 'rgba(0, 102, 255, 0.1)',
-        fill: true,
-        tension: 0.25
+        fill: true, tension: 0.3
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8899aa', font: { family: 'Cairo' } } },
-        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8899aa' } }
-      },
-      plugins: { legend: { display: false } }
+        x: { ticks: { color: '#8899aa', font: { family: 'Cairo' } } },
+        y: { ticks: { color: '#8899aa' } }
+      }
     }
   });
 }
 
-// ==================== SEARCH & INTERACTIVE LOGS ====================
+// ==================== SEARCH & LOGS ENGINE ====================
 function filterLogsData() {
   const query = document.getElementById('flt-search').value.toLowerCase().trim();
   const group = document.getElementById('flt-group').value;
   const type = document.getElementById('flt-type').value;
   const dateVal = document.getElementById('flt-date').value;
 
-  let formattedFilterDate = "";
-  if(dateVal) {
-    formattedFilterDate = new Date(dateVal).toLocaleDateString('ar-SA').replace(/\//g, '-');
-  }
+  let formattedFilterDate = dateVal ? new Date(dateVal).toLocaleDateString('ar-SA').replace(/\//g, '-') : "";
 
   FILTERED_DATA = SERVER_DATA.filter(r => {
     const matchSearch = !query || (r.name && r.name.toLowerCase().includes(query)) || (r.id && String(r.id).includes(query));
     const matchGroup = group === "ALL" || r.group === group;
     const matchType = type === "ALL" || r.type === type;
     const matchDate = !dateVal || r.date === dateVal || r.date === formattedFilterDate;
-    
     return matchSearch && matchGroup && matchType && matchDate;
   });
 
-  renderLogsTableHtml();
-}
-
-function renderLogsTableHtml() {
   const tbody = document.getElementById('logs-table-body');
   if(FILTERED_DATA.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">لا توجد سجلات مطابقة للفلاتر الحالية ابداً.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted)">لا توجد بيانات مطابقة للفلاتر الحالية</td></tr>';
     return;
   }
 
-  tbody.innerHTML = FILTERED_DATA.map((r, idx) => `
+  tbody.innerHTML = FILTERED_DATA.map(r => `
     <tr>
-      <td style="color:var(--muted); font-size:0.8rem">${idx+1}</td>
       <td style="color:var(--accent); font-weight:700">${r.id}</td>
-      <td style="font-weight:700">${r.name}</td>
+      <td style="font-weight:700">${r.name || '—'}</td>
       <td style="color:var(--yellow)">${r.group}</td>
       <td>${r.date}</td>
-      <td style="color:var(--muted)">${r.time}</td>
-      <td><span class="badge ${r.type==='حضور'?'badge-green':'badge-red'}">${r.type}</span></td>
-      <td style="color:var(--muted)">${r.dist}</td>
+      <td>${r.time}</td>
+      <td>
+        <select class="status-select" onchange="changeTraineeStatusOnSheet('${r.id}', '${r.name}', '${r.group}', '${r.date}', this.value)">
+          <option value="حضور" ${r.type==='حضور'?'selected':''}>حضور</option>
+          <option value="انصراف" ${r.type==='انصراف'?'selected':''}>انصراف</option>
+          <option value="تأخير" ${r.type==='تأخير'?'selected':''}>تأخير</option>
+          <option value="غياب" ${r.type==='غياب'?'selected':''}>غياب</option>
+        </select>
+      </td>
+      <td><span class="audit-text">👤 ${r.changedBy}</span></td>
     </tr>
   `).join('');
 }
 
-function resetFilters() {
-  document.getElementById('flt-search').value = "";
-  document.getElementById('flt-group').value = "ALL";
-  document.getElementById('flt-type').value = "ALL";
-  document.getElementById('flt-date').value = "";
-  FILTERED_DATA = [...SERVER_DATA];
-  renderLogsTableHtml();
+// ==================== TWO-WAY SYNC ENGINE ====================
+function changeTraineeStatusOnSheet(traineeId, traineeName, group, dateStr, newStatus) {
+  if(!GOOGLE_SCRIPT_URL) {
+    alert("❌ يرجى إعداد رابط بوابة التعديل البرمجية Apps Script أولاً!");
+    return;
+  }
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "updateStatus",
+      traineeId: traineeId,
+      traineeName: traineeName,
+      group: group,
+      date: dateStr,
+      status: newStatus,
+      username: CURRENT_USER
+    })
+  }).then(() => {
+    alert(`✅ تم إرسال أمر التعديل بنجاح وجاري المزامنة مع الشيت باسم: (${CURRENT_USER})`);
+    setTimeout(fetchCsvFromGoogleSheets, 2000);
+  }).catch(err => alert("حدث خطأ بالاتصال بالبوابة البرمجية: " + err));
 }
 
 // ==================== AUTO ABSENCE DETECTION ENGINE ====================
@@ -729,91 +597,149 @@ function executeAbsenceCheck() {
   const targetDate = document.getElementById('absence-check-date').value;
   const tbody = document.getElementById('absence-table-body');
   
-  if(!targetDate) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">الرجاء تحديد تاريخ لبدء تشغيل مقارنة كشف الغياب</td></tr>';
-    return;
-  }
-
+  if(!targetDate) return;
   const altFormattedDate = new Date(targetDate).toLocaleDateString('ar-SA').replace(/\//g, '-');
 
-  // حصر قائمة بـ IDs لكل الطلاب الحاضرين في هذا اليوم المحدد
   const presentStudentsToday = new Set(
     SERVER_DATA
-      .filter(r => (r.date === targetDate || r.date === altFormattedDate) && r.type === "حضور")
+      .filter(r => (r.date === targetDate || r.date === altFormattedDate) && (r.type === "حضور" || r.type === "تأخير"))
       .map(r => String(r.id).trim())
   );
 
-  // الفلترة العكسية: من ينتمي لقائمة الطلاب الكلية ولم يحضر اليوم يعتبر غائب تلقائياً
-  ABSENT_LIST = SYSTEM_TRAINEES.filter(student => !presentStudentsToday.has(String(student.id).trim()));
+  const absentList = SYSTEM_TRAINEES.filter(student => !presentStudentsToday.has(String(student.id).trim()));
 
-  // تحديث عدادات الشاشة المصغرة للغياب
-  document.getElementById('abs-stat-total').textContent = SYSTEM_TRAINEES.length;
-  document.getElementById('abs-stat-present').textContent = presentStudentsToday.size;
-  document.getElementById('abs-stat-absent').textContent = ABSENT_LIST.length;
-
-  if(ABSENT_LIST.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><span class="badge badge-green" style="font-size:0.9rem; padding:8px 16px;">✅ نسبة حضور 100% لا توجد غيابات مسجلة لهذا اليوم</span></td></tr>';
+  if(absentList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--green)">✅ حضور كامل بنسبة 100% ولا توجد غيابات في هذا التاريخ!</td></tr>';
     return;
   }
 
-  tbody.innerHTML = ABSENT_LIST.map((t, idx) => `
+  tbody.innerHTML = absentList.map(t => `
     <tr>
-      <td style="color:var(--muted)">${idx+1}</td>
       <td style="color:var(--accent); font-weight:700">${t.id}</td>
       <td style="font-weight:700">${t.name}</td>
       <td style="color:var(--yellow)">${t.group}</td>
       <td><span class="badge badge-red">❌ غائب تلقائي</span></td>
+      <td>
+        <button class="btn btn-primary" style="padding:4px 10px; font-size:0.75rem;" onclick="changeTraineeStatusOnSheet('${t.id}', '${t.name}', '${t.group}', '${targetDate}', 'تأخير')">⏱️ تأخير</button>
+        <button class="btn btn-ghost" style="padding:4px 10px; font-size:0.75rem;" onclick="changeTraineeStatusOnSheet('${t.id}', '${t.name}', '${t.group}', '${targetDate}', 'حضور')">✅ حضور</button>
+      </td>
     </tr>
   `).join('');
 }
 
-// ==================== SYSTEM EXPORTS TO EXCEL ====================
-function exportFilteredToExcel() {
-  if(FILTERED_DATA.length === 0) { alert('لا توجد سجلات مفلترة لتصديرها'); return; }
-  buildExcelDownload(
-    ['#', 'Training ID', 'اسم المتدرب', 'المجموعة', 'التاريخ', 'الوقت', 'نوع الحركة', 'المسافة'],
-    FILTERED_DATA.map((r, i) => [i+1, r.id, r.name, r.group, r.date, r.time, r.type, r.dist]),
-    `كشف_الحركات_المفلتر_${new Date().toISOString().split('T')[0]}`
-  );
+// ==================== MATERIAL & SIDEBAR PANEL ENGINE ====================
+
+// دالة لحفظ وتحديث تفاصيل المادة التدريبية
+function saveMaterialContent() {
+  const txt = document.getElementById('material-editor').value;
+  const selectedDay = document.getElementById('material-day-select').value;
+  const selectedDate = document.getElementById('material-date-input').value;
+
+  if(!selectedDate) {
+    alert("❌ يرجى اختيار تاريخ مرافق لليوم التدريبي أولاً!");
+    return;
+  }
+
+  if(!GOOGLE_SCRIPT_URL) {
+    alert("❌ عذراً، لم يتم العثور على رابط بوابة Apps Script.");
+    return;
+  }
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "updateMaterial",
+      content: txt,
+      dayNumber: selectedDay,
+      materialDate: selectedDate,
+      username: CURRENT_USER
+    })
+  }).then(() => {
+    alert(`✅ تم حفظ بيانات (${selectedDay}) بنجاح وجاري تحديث اللوحة الجانبية...`);
+    loadMaterialContent(); // تحديث الحقول واللوحة الجانبية معاً
+  }).catch(err => console.error(err));
 }
 
-function exportAbsenceToExcel() {
-  if(ABSENT_LIST.length === 0) { alert('لا توجد أسماء غياب لتصديرها في هذا التاريخ'); return; }
-  const selectedDate = document.getElementById('absence-check-date').value;
-  buildExcelDownload(
-    ['#', 'Training ID', 'اسم المتدرب الغائب', 'المجموعة التدريبية', 'الحالة الافتراضية'],
-    ABSENT_LIST.map((t, i) => [i+1, t.id, t.name, t.group, 'غائب تلقائي']),
-    `كشف_الغياب_التلقائي_لتاريخ_${selectedDate}`
-  );
-}
-
-function buildExcelDownload(headers, rows, filename) {
-  let excelTemplate = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
-  <head><meta charset="UTF-8"><style>
-    th { background-color: #1e293b; color: #00d4ff; font-weight: bold; padding: 10px; border: 1px solid #475569; text-align: right; }
-    td { padding: 8px; border: 1px solid #cbd5e1; text-align: right; }
-    tr:nth-child(even) { background-color: #f8fafc; }
-  </style></head><body dir="rtl">
-  <table>
-    <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-    ${rows.map(r => `<tr>${r.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
-  </table></body></html>`;
-
-  const blob = new Blob(['\uFEFF' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
-  const downloadLink = document.createElement('a');
-  downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = `${filename}.xls`;
-  downloadLink.click();
-}
-
-// ==================== SETTINGS PAGE CONTEXT ====================
-function saveSettings() {
-  const inputUrl = document.getElementById('cfg-csv-url').value.trim();
-  if(!inputUrl) { alert('يرجى إدخال رابط صالح أولاً'); return; }
+// دالة لجلب المادة لليوم المختار وتحديث شريط الملخصات الجانبي الشامل
+function loadMaterialContent() {
+  if(!GOOGLE_SCRIPT_URL) return;
   
-  GOOGLE_CSV_URL = inputUrl;
-  localStorage.setItem('dash_google_csv', inputUrl);
-  alert('✅ تم حفظ رابط جوجل شيت الجديد بنجاح، جاري إعادة المزامنة...');
+  const selectedDay = document.getElementById('material-day-select').value;
+  document.getElementById('material-audit-info').innerHTML = `🔄 جاري مزامنة بيانات ${selectedDay}...`;
+
+  // 1. أولاً: جلب تفاصيل اليوم المحدد لتعبئة الصندوق الرئيسي
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterial&dayNumber=${encodeURIComponent(selectedDay)}`)
+  .then(res => res.json())
+  .then(data => {
+    if(data && data.materialDate) {
+      document.getElementById('material-editor').value = data.content;
+      document.getElementById('material-date-input').value = data.materialDate;
+      document.getElementById('material-audit-info').innerHTML = `📝 المدخل الحالي: <strong style="color:var(--accent)">${data.username}</strong> | بتاريخ <strong style="color:var(--yellow)">${data.materialDate}</strong>`;
+    } else {
+      document.getElementById('material-editor').value = "";
+      document.getElementById('material-date-input').value = new Date().toISOString().split('T')[0];
+      document.getElementById('material-audit-info').innerHTML = `💡 <span style="color:var(--green)">هذا اليوم (${selectedDay}) فارغ ومتاح للتعبئة الآن.</span>`;
+    }
+  }).catch(() => { document.getElementById('material-audit-info').innerHTML = `❌ خطأ بمزامنة محتوى اليوم.`; });
+
+  // 2. ثانياً: جلب وتحديث اللوحة الجانبية (قائمة كل الأيام المسجلة)
+  updateSidebarRecords();
+}
+
+// دالة بناء وتحديث سجل الأيام في اللوحة الجانبية اليمنى
+function updateSidebarRecords() {
+  const container = document.getElementById('sidebar-records-container');
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterialList`)
+  .then(res => res.json())
+  .then(list => {
+    if(!list || list.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:0.8rem; padding:20px;">📭 لا توجد سجلات محفوظة ومدرجة حتى الآن.</div>';
+      return;
+    }
+    
+    // بناء بطاقات الأيام المسجلة داخل لوحة السايدبار
+    container.innerHTML = list.map(item => {
+      // اختصار محتوى النص لكي لا يشغل مساحة كبيرة باللوحة الجانبية
+      let shortContent = item.content.length > 35 ? item.content.substring(0, 35) + "..." : item.content;
+      return `
+        <div class="sidebar-item" onclick="selectDayFromSidebar('${item.dayNumber}')">
+          <div class="day-title">
+            <span>📅 ${item.dayNumber}</span>
+            <span style="font-size:0.7rem; color:var(--yellow);">${item.materialDate}</span>
+          </div>
+          <div class="meta-desc">
+            <p style="color:var(--text); margin-bottom:2px;">${shortContent || '(بدون نص محتوى)'}</p>
+            <p style="font-size:0.65rem; color:var(--muted)">👤 المدرب: ${item.username}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }).catch(() => {
+    container.innerHTML = '<div style="text-align:center; color:var(--red); font-size:0.8rem; padding:20px;">❌ تعذر جلب السجل العام للمدربين.</div>';
+  });
+}
+
+// دالة تسهل الاستعراض السريع عند النقر على أي يوم من اللوحة الجانبية
+function selectDayFromSidebar(dayName) {
+  document.getElementById('material-day-select').value = dayName;
+  loadMaterialContent();
+}
+
+// ربط قائمة الخيارات لتعمل بشكل متزامن عند التغيير اليدوي
+document.getElementById('material-day-select').addEventListener('change', loadMaterialContent);
+
+// ==================== SYSTEM SETTINGS ====================
+function saveSystemSettings() {
+  GOOGLE_CSV_URL = document.getElementById('cfg-csv-url').value.trim();
+  GOOGLE_SCRIPT_URL = document.getElementById('cfg-script-url').value.trim();
+  
+  localStorage.setItem('dash_google_csv', GOOGLE_CSV_URL);
+  localStorage.setItem('dash_script_url', GOOGLE_SCRIPT_URL);
+  
+  alert("⚙️ تم حفظ الإعدادات بنجاح، جاري جلب البيانات المحدثة...");
   fetchCsvFromGoogleSheets();
 }
 </script>
