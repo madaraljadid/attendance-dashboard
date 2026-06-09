@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>النظام الإداري الذكي | لوحة التحكم التفاعلية الشاملة</title>
+<title>النظام الإداري الذكي المستقر | لوحة التحكم المتكاملة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
@@ -11,11 +11,11 @@
     --bg:#0a0f1e; --card:#111827; --card2:#1a2235;
     --accent:#00d4ff; --accent2:#0066ff;
     --green:#00e676; --red:#ff4444; --yellow:#ffd600;
-    --text:#e8f0fe; --muted:#cbd5e1; --border:rgba(0,212,255,0.18); /* تفتيح درجة الخطوط الافتراضية والحدود لضمان تباين فائق */
+    --text:#e8f0fe; --muted:#cbd5e1; --border:rgba(0,212,255,0.22);
   }
-  body.theme-midnight{--bg:#0b132b;--card:#1c2541;--card2:#2a3a5c;--text:#ffffff;--muted:#f8fafc;--border:rgba(0,212,255,0.3);}
-  body.theme-charcoal{--bg:#121212;--card:#1e1e1e;--card2:#333333;--text:#ffffff;--muted:#f1f5f9;--border:rgba(255,255,255,0.18);}
-  body.theme-forest{--bg:#0a0f0d;--card:#131c19;--card2:#263c35;--text:#ffffff;--muted:#f1f5f9;--border:rgba(0,230,118,0.25);}
+  body.theme-midnight{--bg:#0b132b;--card:#1c2541;--card2:#2a3a5c;--text:#ffffff;--muted:#f8fafc;--border:rgba(0,212,255,0.35);}
+  body.theme-charcoal{--bg:#121212;--card:#1e1e1e;--card2:#333333;--text:#ffffff;--muted:#f1f5f9;--border:rgba(255,255,255,0.25);}
+  body.theme-forest{--bg:#0a0f0d;--card:#131c19;--card2:#263c35;--text:#ffffff;--muted:#f1f5f9;--border:rgba(0,230,118,0.3);}
   body.theme-light{--bg:#f0f4f8;--card:#ffffff;--card2:#e8edf4;--text:#1e293b;--muted:#334155;--border:rgba(0,102,255,0.15);--accent:#0066ff;--accent2:#3b82f6;}
 
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -32,7 +32,6 @@
   header{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--border);margin-bottom:25px;flex-wrap:wrap;gap:15px;}
   .logo{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
-  /* Connection status */
   .conn-status{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;}
   .conn-status.connected{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.25);}
   .conn-status.disconnected{background:rgba(255,68,68,0.12);color:var(--red);border:1px solid rgba(255,68,68,0.25);}
@@ -48,7 +47,6 @@
 
   .page{display:none;} .page.active{display:block;}
   
-  /* نظام شبكة مرن لمنع تداخل الإحصائيات والرسومات البيانية الشاملة */
   .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:25px;}
   .grid-charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:25px;margin-bottom:25px;}
 
@@ -76,24 +74,13 @@
   td{padding:12px;border-bottom:1px solid rgba(128,128,128,.15);color:var(--text);font-weight:600;}
   tr:hover td{background:rgba(0,212,255,.04);}
 
-  /* تلوين الصفوف والتحكم التلقائي عند الاعتماد الناجح لمنع التكرار */
-  tr.approved-row td {background:rgba(0,230,118,0.15) !important; color:#ffffff !important; border-bottom:1px solid var(--green);}
-
-  .badge{padding:4px 10px;border-radius:20px;font-size:.78rem;font-weight:700;display:inline-block;}
-  .badge-green{background:rgba(0,230,118,.2);color:var(--green);}
-  .badge-red{background:rgba(255,68,68,.2);color:var(--red);}
-  .badge-yellow{background:rgba(255,214,0,.2);color:var(--yellow);}
-  .badge-blue{background:rgba(0,212,255,.2);color:var(--accent);}
-
   .status-select{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'Cairo';font-size:.85rem;font-weight:700;outline:none;}
   .chart-container{position:relative;height:260px;width:100%;margin-top:10px;}
 
-  /* Material layout */
   .material-layout{display:grid;grid-template-columns:320px 1fr;gap:20px;}
   @media(max-width:850px){.material-layout{grid-template-columns:1fr;}}
   .sidebar-panel{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:15px;max-height:560px;overflow-y:auto;}
 
-  /* Toast Notification */
   .toast-msg {
     position: fixed; bottom: 25px; left: 25px; background: rgba(17,24,39,0.96); 
     color: #fff; border: 1px solid var(--green); padding: 14px 28px; 
@@ -105,12 +92,11 @@
 
 <div id="toast-container" class="toast-msg"></div>
 
-<!-- Login Screen -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">🔐</div>
     <div class="login-title">تسجيل الدخول للنظام الإداري المطور</div>
-    <div class="login-sub">منصة التحكم التفاعلية والاعتماد الفوري</div>
+    <div class="login-sub">منصة التحكم التفاعلية والاعتماد الفوري المستقر</div>
     <div class="form-group" style="margin-bottom:15px;text-align:right;">
       <label>اسم المستخدم</label>
       <input type="text" id="login-user" class="form-control" placeholder="أدخل اسم المستخدم...">
@@ -124,7 +110,6 @@
   </div>
 </div>
 
-<!-- Main Container -->
 <div class="container" id="main-container">
 
   <header>
@@ -138,7 +123,7 @@
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <button class="btn btn-ghost" onclick="toggleTheme()">🎨 تغيير درجة الخلفية</button>
-      <button class="btn btn-ghost" onclick="fetchCsvFromGoogleSheets()">🔄 تحديث فوري للبيانات</button>
+      <button class="btn btn-ghost" onclick="forceFetchFreshData()">🔄 تحديث فوري للبيانات</button>
       <button class="btn btn-primary" style="background:var(--red);" onclick="handleLogout()">🚪 خروج</button>
     </div>
   </header>
@@ -151,10 +136,7 @@
     <button class="tab admin-only" onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط</button>
   </div>
 
-  <!-- Dashboard Page (المحدثة بالكامل بالتاريخ والمجموعات والعدادات الاحترافية الأربعة) -->
   <div id="page-dashboard" class="page active">
-    
-    <!-- شريط الفلاتر الذكي لصفحة الإحصائيات -->
     <div class="filter-panel" style="background:var(--card2); border:1px solid var(--border);">
       <div class="form-group">
         <label>📆 استعراض إحصائيات تاريخ مخصص:</label>
@@ -167,11 +149,10 @@
         </select>
       </div>
       <div style="text-align:left;">
-        <span style="font-size:0.8rem; font-weight:bold; color:var(--accent);">* تعرض اللوحة تلقائياً بيانات اليوم الحالي بشكل افتراضي</span>
+        <button class="btn btn-success" onclick="exportComprehensiveStatisticalReport()">📥 تصدير التقرير الإحصائي الشامل</button>
       </div>
     </div>
 
-    <!-- العدادات الرقمية الذكية الأربعة المحدثة بالكامل -->
     <div class="grid-4">
       <div class="stat-card">
         <div class="stat-info">
@@ -203,10 +184,9 @@
       </div>
     </div>
 
-    <!-- شبكة الرسومات البيانية المحدثة مصححة الألوان في الـ Dark Mode -->
     <div class="grid-charts">
       <div class="card">
-        <div class="card-title">📊 تحليل ونسبة الحضور إلى الغياب الفعلي للمجموعة المختارة</div>
+        <div class="card-title">📊 تحليل ونسبة الحضور إلى الغياب الفعال للمجموعة المختارة</div>
         <div class="chart-container"><canvas id="interactivePieChart"></canvas></div>
       </div>
       <div class="card">
@@ -216,7 +196,6 @@
     </div>
   </div>
 
-  <!-- Logs Page (منصة الاعتماد المباشر - الافتراضي حضور + عمود التوقيت بجانب التاريخ) -->
   <div id="page-logs" class="page">
     <div class="filter-panel">
       <div class="form-group">
@@ -243,7 +222,7 @@
               <th>اسم المتدرب الكامل</th>
               <th>المجموعة التدريبية</th>
               <th>تاريخ اليوم</th>
-              <th>⏱️ توقيت الحضور الفعلي</th> <!-- العمود الجديد بجانب التاريخ -->
+              <th>⏱️ توقيت الحضور الفعلي</th>
               <th>تحديد حالة الحركة لليوم</th>
               <th>إجراء إرسال الموافقة السحابي</th>
             </tr>
@@ -254,22 +233,17 @@
     </div>
   </div>
 
-  <!-- Absence Page (معزولة بدون أزرار فرعية للتسجيل ومزودة بزر التصدير الذكي) -->
   <div id="page-absence" class="page">
     <div class="card">
       <div class="card-title">🔍 نظام الكشف والرقابة التلقائية للغائبين وحفظ التقارير</div>
-      
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; background:var(--card2); padding:15px; border-radius:10px; margin-bottom:15px; gap:15px;">
         <div class="form-group" style="min-width:240px;">
           <label>📅 اختر تاريخ الفحص والمراقبة الصارم</label>
           <input type="date" id="absence-check-date" class="form-control" onchange="executeAbsenceCheck()">
         </div>
-        <!-- زر التصدير الذكي المضاف حديثاً بأعلى الصفحة -->
         <button class="btn btn-success" id="btn-export-absence" onclick="exportAbsenteeReportToCSV()">📥 تصدير كشف الغائبين (Excel/CSV)</button>
       </div>
-
       <div id="absence-summary" style="margin-bottom:12px;"></div>
-      
       <div class="table-wrap">
         <table>
           <thead>
@@ -286,7 +260,6 @@
     </div>
   </div>
 
-  <!-- Material Page -->
   <div id="page-material" class="page">
     <div class="material-layout">
       <div class="sidebar-panel">
@@ -295,7 +268,6 @@
           <div style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px;">جاري التحميل...</div>
         </div>
       </div>
-
       <div class="card" style="margin-bottom:0;">
         <div class="card-title">📚 تفاصيل وإدارة محتوى الحقيبة التدريبية اليومية</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
@@ -330,7 +302,6 @@
     </div>
   </div>
 
-  <!-- Settings Page -->
   <div id="page-settings" class="page">
     <div class="card">
       <div class="card-title">⚙️ إعدادات الاتصال والمزامنة البنيوية (Admin فقط)</div>
@@ -349,40 +320,27 @@
 </div>
 
 <script>
-// ==================== CONFIG CONFIGURATION ====================
-const APPROVED_USERS = {
-  "admin":     "1234",
-  "k.bobshan": "1234",
-  "b.krier":   "1234",
-  "o.alhoeg":  "1234",
-  "h.ezgele":  "1234"
-};
+const APPROVED_USERS = { "admin":"1234", "k.bobshan":"1234", "b.krier":"1234", "o.alhoeg":"1234", "h.ezgele":"1234" };
 
 let GOOGLE_CSV_URL    = localStorage.getItem('dash_google_csv')    || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ7oboudTsfqeW4IflcLUg8FMRJpzMA2Umj_afcQIjLfRmrbAhotbmfeNuvmli_fg_QMUkKxiqtfQK/pub?gid=720402532&single=true&output=csv';
 let GOOGLE_SCRIPT_URL = localStorage.getItem('dash_script_url')    || 'https://script.google.com/macros/s/AKfycbxhYotI8jCptoz6RtWiTOBO_eeS_RzTUqktkmh15Qx70VZoXeW0zm6r9j01pYPOKvXP/exec';
 
-let SERVER_DATA     = []; 
-let SYSTEM_TRAINEES = []; 
-let SYSTEM_GROUPS   = new Set();
-let CURRENT_USER    = "";
+let SERVER_DATA       = []; 
+let SYSTEM_TRAINEES   = []; 
+let SYSTEM_GROUPS     = new Set();
+let CLOUD_APPROVED_SET = new Set(); // مصفوفة الفرز العكسي الدائم لمنع تكرار الأسماء بعد إعادة تسجيل الدخول والخروج
+let CURRENT_USER      = "";
 
-let SESSION_APPROVED_IDS = new Set();
 const THEMES = ['default','theme-midnight','theme-charcoal','theme-forest','theme-light'];
 let currentThemeIdx = 0;
+let chartPie = null, chartLine = null;
 
-let chartPie  = null;
-let chartLine = null;
-let LOCAL_MATERIALS = JSON.parse(localStorage.getItem('local_materials') || '{}');
-
-// ==================== NOTIFICATION SYSTEM ====================
 function showToastMessage(msg) {
   const toast = document.getElementById('toast-container');
-  toast.textContent = msg;
-  toast.style.display = 'block';
+  toast.textContent = msg; toast.style.display = 'block';
   setTimeout(() => { toast.style.display = 'none'; }, 3500);
 }
 
-// ==================== AUTH SYSTEM ====================
 function handleLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
@@ -391,11 +349,7 @@ function handleLogin() {
     document.getElementById('current-user-display').textContent = CURRENT_USER;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('main-container').style.display = 'block';
-    
-    const settingsTab = document.getElementById('tab-settings');
-    if(CURRENT_USER !== 'admin') settingsTab.style.display = 'none';
-    else settingsTab.style.display = '';
-    
+    document.getElementById('tab-settings').style.display = (CURRENT_USER !== 'admin') ? 'none' : '';
     initSystem();
   } else {
     document.getElementById('login-err').style.display = 'block';
@@ -403,44 +357,40 @@ function handleLogin() {
 }
 
 function handleLogout() {
-  CURRENT_USER = "";
-  SESSION_APPROVED_IDS.clear();
+  CURRENT_USER = ""; CLOUD_APPROVED_SET.clear();
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('main-container').style.display = 'none';
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-err').style.display = 'none';
 }
 
 function toggleTheme() {
   document.body.classList.remove(...THEMES);
   currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
-  if(THEMES[currentThemeIdx] !== 'default') {
-    document.body.classList.add(THEMES[currentThemeIdx]);
-  }
-  // إعادة بناء الإحصائيات فورياً لتحديث مصفوفة ألوان النصوص للرسومات البيانية
+  if(THEMES[currentThemeIdx] !== 'default') document.body.classList.add(THEMES[currentThemeIdx]);
   updateInteractiveDashboard();
 }
 
-// دالة تفحص إذا كان الوضع الحالي داكناً لإجبار الخطوط على اللون الأبيض الناصع
 function isCurrentThemeDark() {
   const cls = document.body.className;
   if(cls.includes('theme-light')) return false;
-  return cls.includes('theme-midnight') || cls.includes('theme-charcoal') || cls.includes('theme-forest') || document.body.className === '' || cls.includes('default');
+  return true;
 }
 
-// ==================== SYSTEM INITIALIZATION ====================
 function initSystem() {
   document.getElementById('cfg-csv-url').value    = GOOGLE_CSV_URL;
   document.getElementById('cfg-script-url').value = GOOGLE_SCRIPT_URL;
   
-  const todayStr = new Date().toISOString().split('T')[0];
+  // ضبط الحقول على التوقيت المحلي الفعلي للجهاز لمنع تعطل الأرقام 
+  const localToday = new Date();
+  const offset = localToday.getTimezoneOffset();
+  const adjustedDate = new Date(localToday.getTime() - (offset * 60 * 1000));
+  const todayStr = adjustedDate.toISOString().split('T')[0];
+  
   document.getElementById('flt-date').value           = todayStr;
   document.getElementById('db-filter-date').value     = todayStr;
   document.getElementById('absence-check-date').value = todayStr;
   document.getElementById('material-date-input').value = todayStr;
   
-  fetchCsvFromGoogleSheets();
+  forceFetchFreshData();
 }
 
 function switchTab(tabId) {
@@ -457,28 +407,39 @@ function switchTab(tabId) {
   if(tabId === 'absence') executeAbsenceCheck();
 }
 
-function setConnectionStatus(ok) {
-  const badge = document.getElementById('conn-status-badge');
-  if(ok) {
-    badge.className = 'conn-status connected';
-    badge.innerHTML = '<span class="conn-dot"></span>متصل سحابياً مع السيرفر';
-  } else {
-    badge.className = 'conn-status disconnected';
-    badge.innerHTML = '<span class="conn-dot"></span>فشل مزامنة الملف';
-  }
-}
-
-function fetchCsvFromGoogleSheets() {
-  fetch(GOOGLE_CSV_URL + '&t=' + Date.now())
+// تحديث ذكي مضاف يتجاوز ذاكرة الكاش تماماً لإصلاح مشكلة عدم عمل الزر سابقاً
+function forceFetchFreshData() {
+  showToastMessage("🔄 جاري سحب أحدث الاعتمادات والحركات اللحظية من السيرفر السحابي...");
+  
+  // خطوة 1: سحب الاعتمادات الدائمة من شيت "البيانات المعتمدة" للفرز العكسي
+  let approvedUrl = GOOGLE_SCRIPT_URL + "?action=getApprovedList&t=" + Date.now();
+  
+  fetch(approvedUrl)
+  .then(res => res.json())
+  .then(approvedData => {
+    CLOUD_APPROVED_SET.clear();
+    approvedData.forEach(item => {
+      // دمج المعرف + التاريخ المسترجع لعمل قفل أمان
+      CLOUD_APPROVED_SET.add(`${String(item.traineeId).trim()}_${item.date}`);
+    });
+    
+    // خطوة 2: جلب شيت الحركات الرئيسي الفعلي بكاسر الكاش الجبري
+    return fetch(GOOGLE_CSV_URL + '&t=' + Date.now());
+  })
   .then(res => { if(!res.ok) throw new Error(); return res.text(); })
   .then(csvText => {
-    setConnectionStatus(true);
+    document.getElementById('conn-status-badge').className = 'conn-status connected';
+    document.getElementById('conn-status-badge').innerHTML = '<span class="conn-dot"></span>متصل سحابياً مع السيرفر';
     parseCsvToData(csvText);
+    showToastMessage("✅ تم تحديث وتطهير البيانات المتطابقة بنجاح!");
   })
-  .catch(() => { setConnectionStatus(false); });
+  .catch(() => {
+    document.getElementById('conn-status-badge').className = 'conn-status disconnected';
+    document.getElementById('conn-status-badge').innerHTML = '<span class="conn-dot"></span>فشل مزامنة الملف';
+  });
 }
 
-// ==================== PARSE SPREADSHEET CSV DATA ====================
+// دالة فك التشفير والتحليل المرن المتقدمة (Regex Parsing) لاستخراج الوقت المفقود
 function parseCsvToData(csvText) {
   const lines = csvText.split(/\r?\n/);
   if(lines.length < 2) return;
@@ -488,17 +449,13 @@ function parseCsvToData(csvText) {
   SYSTEM_GROUPS.clear();
 
   const headers = lines[0].split(',').map(h => h.replace(/["']/g,"").trim());
-  let idxTime     = headers.findIndex(h => h.includes('وقت') || h.includes('البدء'));
-  let idxName     = headers.findIndex(h => h.includes('الاسم') || h.toLowerCase().includes('name'));
-  let idxTrainId  = headers.findIndex(h => h.toLowerCase().includes('training') || h.includes('معرف'));
-  let idxType     = headers.findIndex(h => h.includes('الحالة') || h.includes('الخيارات') || h.includes('اختيار'));
-  let idxGroup    = headers.findIndex(h => h.includes('مجموعة'));
+  let idxTime = headers.findIndex(h => h.includes('وقت') || h.includes('الطابع') || h.includes('البدء'));
+  let idxName = headers.findIndex(h => h.includes('الاسم') || h.toLowerCase().includes('name'));
+  let idxId   = headers.findIndex(h => h.toLowerCase().includes('training') || h.includes('معرف'));
+  let idxType = headers.findIndex(h => h.includes('الحالة') || h.includes('الخيارات'));
+  let idxGroup= headers.findIndex(h => h.includes('مجموعة'));
 
-  if(idxTime    === -1) idxTime    = 1;
-  if(idxName    === -1) idxName    = 2;
-  if(idxTrainId === -1) idxTrainId = 3;
-  if(idxType    === -1) idxType    = 4;
-  if(idxGroup   === -1) idxGroup   = 5;
+  if(idxTime===-1) idxTime=1; if(idxName===-1) idxName=2; if(idxId===-1) idxId=3; if(idxType===-1) idxType=4; if(idxGroup===-1) idxGroup=5;
 
   for(let i = 1; i < lines.length; i++) {
     if(!lines[i].trim()) continue;
@@ -508,60 +465,58 @@ function parseCsvToData(csvText) {
 
     const rawType = cols[idxType] || '';
     let recType = 'حضور';
-    if(rawType.includes('الخروج') || rawType.trim() === 'انصراف') recType = 'انصراف';
-    else if(rawType.includes('الدخول') || rawType.trim() === 'حضور') recType = 'حضور';
-    else if(rawType.includes('تأخير') || rawType.trim() === 'تأخير') recType = 'تأخير';
-    else if(rawType.includes('غياب') || rawType.trim() === 'غياب') recType = 'غياب';
+    if(rawType.includes('تأخير')) recType = 'تأخير';
+    else if(rawType.includes('غياب')) recType = 'غياب';
+    else if(rawType.includes('انصراف')) recType = 'انصراف';
 
-    const timeRaw = cols[idxTime] || '';
-    let datePart = '', timePart = '';
-    if(timeRaw.includes(' ')) {
-      const parts = timeRaw.split(' ');
-      datePart = parts[0];
-      timePart = parts[1] || '';
-      if(datePart.includes('/')) {
-        const dp = datePart.split('/');
-        if(dp.length === 3) datePart = `${dp[2]}-${dp[0].padStart(2,'0')}-${dp[1].padStart(2,'0')}`;
-      }
+    // استخدام التحليل الذكي (RegEx) لحل مشكلة عدم ظهور التوقيت في الخلية المدمجة
+    const timestampRaw = cols[idxTime] || '';
+    let datePart = '', timePart = '—';
+    
+    // التقاط الوقت بصيغة HH:MM:SS أو HH:MM
+    const timeMatch = timestampRaw.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if(timeMatch) {
+      timePart = timeMatch[0];
+    }
+    
+    // التقاط التاريخ وضبطه ليكون YYYY-MM-DD
+    const dateMatch = timestampRaw.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if(dateMatch) {
+      datePart = `${dateMatch[1]}-${dateMatch[2].padStart(2,'0')}-${dateMatch[3].padStart(2,'0')}`;
     } else {
-      datePart = timeRaw;
+      // محاولة رصد التواريخ بصيغة MM/DD/YYYY
+      const dateMatchUS = timestampRaw.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if(dateMatchUS) datePart = `${dateMatchUS[3]}-${dateMatchUS[1].padStart(2,'0')}-${dateMatchUS[2].padStart(2,'0')}`;
+      else datePart = timestampRaw.split(' ')[0] || '';
     }
 
-    const trainId = cols[idxTrainId] || '';
-    const name    = cols[idxName]    || '';
-    const group   = cols[idxGroup]   || 'المجموعة العامة';
-
     let rec = {
-      id:    trainId.trim(),
-      name:  name.trim(),
-      group: group.trim(),
-      date:  datePart.trim(),
-      time:  timePart.trim(),
-      type:  recType
+      id: cols[idxId] ? cols[idxId].trim() : '',
+      name: cols[idxName] ? cols[idxName].trim() : '',
+      group: cols[idxGroup] ? cols[idxGroup].trim() : 'المجموعة العامة',
+      date: datePart,
+      time: timePart,
+      type: recType
     };
 
     if(!rec.id && !rec.name) continue;
     tempRecords.push(rec);
 
     const key = rec.id || rec.name;
-    if(key && !tempTraineesMap.has(key)) {
-      tempTraineesMap.set(key, { id: rec.id, name: rec.name, group: rec.group });
-    }
+    if(!tempTraineesMap.has(key)) tempTraineesMap.set(key, { id: rec.id, name: rec.name, group: rec.group });
     if(rec.group) SYSTEM_GROUPS.add(rec.group);
   }
 
-  SERVER_DATA     = tempRecords;
+  SERVER_DATA = tempRecords;
   SYSTEM_TRAINEES = Array.from(tempTraineesMap.values());
 
-  // تحديث القوائم المنسدلة للمجموعات في شاشة الإحصائيات واللوحات الأخرى
   const dbSel = document.getElementById('db-filter-group');
   dbSel.innerHTML = '<option value="ALL">كل المجموعات التدريبية</option>';
-  
   const logSel = document.getElementById('flt-group');
   logSel.innerHTML = '<option value="ALL">كل المجموعات</option>';
   
   SYSTEM_GROUPS.forEach(g => {
-    dbSel.innerHTML  += `<option value="${g}">${g}</option>`;
+    dbSel.innerHTML += `<option value="${g}">${g}</option>`;
     logSel.innerHTML += `<option value="${g}">${g}</option>`;
   });
 
@@ -570,45 +525,45 @@ function parseCsvToData(csvText) {
   executeAbsenceCheck();
 }
 
-// ==================== INTERACTIVE DASHBOARD MOTOR (التعديل الهيكلي الجديد) ====================
+// ==================== ENGINE UPDATE: INTERACTIVE DASHBOARD ====================
 function updateInteractiveDashboard() {
   const targetDate  = document.getElementById('db-filter-date').value;
   const targetGroup = document.getElementById('db-filter-group').value;
-
   if(!targetDate) return;
 
-  // فلترة قائمة المتدربين بناءً على المجموعة المختارة
   const filteredTrainees = SYSTEM_TRAINEES.filter(t => targetGroup === 'ALL' || t.group === targetGroup);
-  const totalTraineesCount = filteredTrainees.length;
-
-  // تصفية حركات السيرفر لهذا التاريخ والمجموعة المحددة
+  
+  // تصفية الحركات اللحظية + فحص حركات شيت الاعتمادات المسترجع للرصد الرقمي الشامل
   const activeRecords = SERVER_DATA.filter(r => r.date === targetDate && (targetGroup === 'ALL' || r.group === targetGroup));
 
-  // معرفة الطلاب الحاضرين فعلياً (حضور أو تأخير أو انصراف)
-  const presentIdsSet = new Set(
-    activeRecords.filter(r => r.type === 'حضور' || r.type === 'تأخير' || r.type === 'انصراف').map(r => String(r.id).trim())
-  );
-
-  let presentCount = 0;
-  let delayCount   = 0;
-  let absentCount  = 0;
+  let presentCount = 0; let delayCount = 0; let absentCount = 0;
 
   filteredTrainees.forEach(t => {
     const tIdClean = String(t.id).trim();
-    if(presentIdsSet.has(tIdClean)) {
-      presentCount++;
-      // فحص إذا كان المتدرب يمتلك حركة تأخير في هذا اليوم
-      const hasDelay = activeRecords.some(r => String(r.id).trim() === tIdClean && r.type === 'تأخير');
-      if(hasDelay) delayCount++;
+    const globalKey = `${tIdClean}_${targetDate}`;
+    
+    // فحص مزدوج: هل هو حاضر في شيت البصمة اللحظي، أو هل تم اعتماده سحابياً
+    const isPresentInSheet = activeRecords.some(r => String(r.id).trim() === tIdClean && (r.type === 'حضور' || r.type === 'تأخير'));
+    const isDelayedInSheet = activeRecords.some(r => String(r.id).trim() === tIdClean && r.type === 'تأخير');
+    
+    // محاكاة الحالة الافتراضية للوحة (الحضور المبدئي)
+    if(CLOUD_APPROVED_SET.has(globalKey)) {
+      // تم حسمه مسبقاً، نفحص حالته المعتمدة
+      const isAbsentState = activeRecords.some(r => String(r.id).trim() === tIdClean && r.type === 'غياب');
+      if(isAbsentState) absentCount++; 
+      else { presentCount++; if(isDelayedInSheet) delayCount++; }
     } else {
-      absentCount++;
+      // لم يعتمد بعد، بالتالي يظهر في العدادات بناءً على بصمته الفعلية أو الافتراضية
+      if(isPresentInSheet || activeRecords.length === 0) {
+        presentCount++; if(isDelayedInSheet) delayCount++;
+      } else {
+        absentCount++;
+      }
     }
   });
 
-  // حساب نسبة الانضباط والالتزام البرمجي
-  let commitmentRatio = totalTraineesCount > 0 ? Math.round((presentCount / totalTraineesCount) * 100) : 0;
+  let commitmentRatio = filteredTrainees.length > 0 ? Math.round((presentCount / filteredTrainees.length) * 100) : 0;
 
-  // حقن البيانات داخل العدادات الأربعة الاحترافية
   document.getElementById('db-stat-present').textContent = presentCount;
   document.getElementById('db-stat-absent').textContent  = absentCount;
   document.getElementById('db-stat-ratio').textContent   = commitmentRatio + "%";
@@ -617,40 +572,26 @@ function updateInteractiveDashboard() {
   renderDynamicCharts(presentCount, absentCount, activeRecords);
 }
 
-// ==================== RENDER DYNAMIC CHARTS WITH HIGH CONTRAST DARK MODE ====================
 function renderDynamicCharts(present, absent, records) {
   const isDark = isCurrentThemeDark();
-  const textClr = isDark ? '#ffffff' : '#1e293b'; // تحويل كلي لنصوص الخطوط للون الأبيض في الدارك مود
+  const textClr = isDark ? '#ffffff' : '#1e293b';
 
-  // 1. الدائرة المجوفة (Donut Chart) للحاضرين والغائبين
   if(chartPie) chartPie.destroy();
   chartPie = new Chart(document.getElementById('interactivePieChart').getContext('2d'), {
     type: 'doughnut',
     data: {
       labels: ['إجمالي الحضور والالتزام', 'حالات الغياب المتبقية'],
-      datasets: [{
-        data: [present, absent],
-        backgroundColor: ['#00e676', '#ff4444'],
-        borderWidth: 0
-      }]
+      datasets: [{ data: [present, absent], backgroundColor: ['#00e676', '#ff4444'], borderWidth: 0 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: textClr, font: { family: 'Cairo', size: 12, weight: 'bold' } }
-        }
-      }
+      plugins: { legend: { position: 'bottom', labels: { color: textClr, font: { family: 'Cairo', size: 12, weight: 'bold' } } } }
     }
   });
 
-  // 2. منحنى الساعات الفعلي للتحركات
-  let hoursMap = {};
-  for(let h = 8; h <= 17; h++) hoursMap[`${String(h).padStart(2,'0')}:00`] = 0;
-  
-  records.filter(r => r.type === 'حضور' || r.type === 'تأخير').forEach(r => {
-    if(r.time) {
+  let hoursMap = {}; for(let h = 8; h <= 17; h++) hoursMap[`${String(h).padStart(2,'0')}:00`] = 0;
+  records.forEach(r => {
+    if(r.time && r.time !== '—') {
       const h = parseInt(r.time.split(':')[0]);
       const key = `${String(h).padStart(2,'0')}:00`;
       if(hoursMap[key] !== undefined) hoursMap[key]++;
@@ -662,37 +603,62 @@ function renderDynamicCharts(present, absent, records) {
     type: 'line',
     data: {
       labels: Object.keys(hoursMap),
-      datasets: [{
-        label: 'حركات رصد التواجد الفعلي عبر الساعات',
-        data: Object.values(hoursMap),
-        borderColor: '#00d4ff',
-        backgroundColor: 'rgba(0,212,255,0.12)',
-        fill: true, tension: 0.35,
-        pointBackgroundColor: '#ffd600',
-        pointRadius: 4
-      }]
+      datasets: [{ label: 'رصد التواجد الفعلي عبر الساعات', data: Object.values(hoursMap), borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.12)', fill: true }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: {
-        x: { 
-          grid: { color: 'rgba(128,128,128,0.15)' },
-          ticks: { color: textClr, font: { family: 'Cairo', weight: 'bold' } } 
-        },
-        y: { 
-          beginAtZero: true,
-          grid: { color: 'rgba(128,128,128,0.15)' },
-          ticks: { color: textClr, font: { family: 'Cairo', weight: 'bold' }, stepSize: 1 } 
-        }
+        x: { grid:{color:'rgba(128,128,128,0.15)'}, ticks:{color:textClr, font:{family:'Cairo', weight:'bold'}} },
+        y: { beginAtZero:true, grid:{color:'rgba(128,128,128,0.15)'}, ticks:{color:textClr, font:{family:'Cairo', weight:'bold'}, stepSize:1} }
       },
-      plugins: {
-        legend: { labels: { color: textClr, font: { family: 'Cairo', weight: 'bold' } } }
-      }
+      plugins: { legend: { labels: { color: textClr, font: { family: 'Cairo', weight: 'bold' } } } }
     }
   });
 }
 
-// ==================== LOGS MOTOR (منصة الاعتماد - الافتراضي حضور وعمود التوقيت) ====================
+// دالة التصدير الشاملة الجديدة بالكامل لكل البيانات الضرورية من صفحة الإحصائيات اليومية الديناميكية
+function exportComprehensiveStatisticalReport() {
+  const targetDate  = document.getElementById('db-filter-date').value;
+  const targetGroup = document.getElementById('db-filter-group').value;
+  if(!targetDate) { alert('❌ يرجى تحديد التاريخ أولاً للتصدير!'); return; }
+
+  let csvContent = "\uFEFF"; // مشفر للغة العربية والرموز
+  csvContent += `تقرير إحصائي شامل لتاريخ,${targetDate},المجموعة المستهدفة,${targetGroup}\n`;
+  csvContent += `إجمالي الحضور,${document.getElementById('db-stat-present').textContent},إجمالي الغياب,${document.getElementById('db-stat-absent').textContent},نسبة الالتزام اليومي,${document.getElementById('db-stat-ratio').textContent}\n\n`;
+  csvContent += "معرف المتدرب,اسم المتدرب الكامل,المجموعة التدريبية,الحالة الفردية المرصودة,توقيت الحركة الفعلي القادم من الشيت\n";
+
+  const filteredTrainees = SYSTEM_TRAINEES.filter(t => targetGroup === 'ALL' || t.group === targetGroup);
+  const activeRecords = SERVER_DATA.filter(r => r.date === targetDate && (targetGroup === 'ALL' || r.group === targetGroup));
+
+  filteredTrainees.forEach(t => {
+    const tIdClean = String(t.id).trim();
+    const globalKey = `${tIdClean}_${targetDate}`;
+    
+    let currentStatus = "حضور (افتراضي)";
+    let currentRowTime = "—";
+    
+    const matchedRecord = activeRecords.find(r => String(r.id).trim() === tIdClean);
+    if(matchedRecord) {
+      currentStatus = matchedRecord.type;
+      currentRowTime = matchedRecord.time || "—";
+    }
+    if(CLOUD_APPROVED_SET.has(globalKey)) {
+      currentStatus += " [معتمد سحابياً]";
+    }
+    csvContent += `"${t.id}","${t.name}","${t.group}","${currentStatus}","${currentRowTime}"\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `التقرير_الإحصائي_الشامل_${targetDate}.csv`);
+  document.body.appendChild(link);
+  link.click(); document.body.removeChild(link);
+  showToastMessage("📥 تم استخراج وتصدير التقرير التحليلي الشامل!");
+}
+
+// ==================== ENGINE UPDATE: LOGS LOGIC (تطهير كلي مستمر بقفل الأمان) ====================
 function filterLogsData() {
   const dateVal = document.getElementById('flt-date').value;
   const query   = document.getElementById('flt-search').value.toLowerCase().trim();
@@ -704,33 +670,35 @@ function filterLogsData() {
     return;
   }
 
+  let dateRecordsMap = new Map();
+  SERVER_DATA.filter(r => r.date === dateVal).forEach(r => {
+    dateRecordsMap.set(String(r.id).trim(), { type: r.type, time: r.time });
+  });
+
+  // التعديل الجوهري: التطهير الكلي والإخفاء التام لأي متدرب موجود في CLOUD_APPROVED_SET
   const displayedTrainees = SYSTEM_TRAINEES.filter(t => {
+    const tIdClean = String(t.id).trim();
+    const globalKey = `${tIdClean}_${dateVal}`;
+    
+    if(CLOUD_APPROVED_SET.has(globalKey)) return false; // إخفاء وحذف فوري للمعتمدين لضمان عدم ظهورهم مجدداً
+    
     const matchQuery = !query || t.name.toLowerCase().includes(query) || String(t.id).includes(query);
     const matchGroup = group === 'ALL' || t.group === group;
     return matchQuery && matchGroup;
   });
 
   if(!displayedTrainees.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:25px;color:var(--muted)">لا توجد أسماء متدربين مطابقة للخيارات الحالية</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:25px;color:var(--green)">✅ مكتمل! تم اعتماد ومراجعة كافة المتدربين لتاريخ هذا اليوم بالكامل!</td></tr>';
     return;
   }
 
-  // استخراج الحركات والوقت الموثق مسبقاً لهذا التاريخ من ملف الإكسل السحابي
-  let dateRecordsMap = new Map();
-  SERVER_DATA.filter(r => r.date === dateVal).forEach(r => {
-    dateRecordsMap.set(String(r.id).trim(), { type: r.type, time: r.time });
-  });
-
   tbody.innerHTML = displayedTrainees.map(t => {
     const tIdClean = String(t.id).trim();
-    const sessionKey = `${tIdClean}_${dateVal}`;
-    
-    const isApprovedInSession = SESSION_APPROVED_IDS.has(sessionKey);
     const sheetInfo = dateRecordsMap.get(tIdClean);
     
-    // التعديل الأول: الحالة الافتراضية هي "حضور" دائماً إذا لم توجد حركة مسبقة
+    // التعديل: الحالة الافتراضية "حضور" دائماً والتوقيت مستخرج بشكل ديناميكي مرن
     let savedStatus = 'حضور'; 
-    let actualTime  = '—';    // الافتراضي فارغ إذا لم يحضر بعد
+    let actualTime  = '—';
 
     if (sheetInfo) {
       savedStatus = sheetInfo.type;
@@ -738,33 +706,27 @@ function filterLogsData() {
     }
 
     return `
-      <tr id="row_${tIdClean}" class="${isApprovedInSession ? 'approved-row' : ''}">
+      <tr id="row_${tIdClean}">
         <td style="color:var(--accent); font-weight:bold;">${t.id || '—'}</td>
         <td style="font-weight:900;">${t.name || '—'}</td>
         <td style="color:var(--yellow); font-weight:bold;">${t.group}</td>
         <td><span class="badge badge-blue">${dateVal}</span></td>
-        <!-- عمود التوقيت الجديد بجانب عمود التاريخ -->
         <td style="color:var(--accent); font-weight:bold;">${actualTime}</td> 
         <td>
-          <select id="sel_status_${tIdClean}" class="status-select" ${isApprovedInSession ? 'disabled' : ''}>
+          <select id="sel_status_${tIdClean}" class="status-select">
             <option value="حضور" ${savedStatus === 'حضور' ? 'selected' : ''}>حضور</option>
             <option value="تأخير" ${savedStatus === 'تأخير' ? 'selected' : ''}>تأخير</option>
             <option value="غياب" ${savedStatus === 'غياب' ? 'selected' : ''}>غياب</option>
           </select>
         </td>
         <td>
-          ${isApprovedInSession ? 
-            `<span style="color:#ffffff; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">تم الاعتماد ✅</span>` : 
-            `<button class="btn btn-primary" style="padding:4px 12px; font-size:.8rem;" onclick="sendApprovalActionToExcel('${tIdClean}', '${t.name}', '${t.group}', '${dateVal}')">✔ موافقة</button>`
-          }
+          <button class="btn btn-primary" style="padding:4px 12px; font-size:.8rem;" onclick="sendApprovalActionToExcel('${tIdClean}', '${t.name}', '${t.group}', '${dateVal}')">✔ موافقة</button>
         </td>
       </tr>`;
   }).join('');
 }
 
 function sendApprovalActionToExcel(traineeId, traineeName, group, dateStr) {
-  if(!GOOGLE_SCRIPT_URL) { alert('❌ يرجى تكوين رابط Apps Script في شاشة الإعدادات أولاً!'); return; }
-  
   const statusSelect = document.getElementById(`sel_status_${traineeId}`);
   const selectedStatus = statusSelect ? statusSelect.value : 'حضور';
   const curTimeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -772,65 +734,50 @@ function sendApprovalActionToExcel(traineeId, traineeName, group, dateStr) {
   showToastMessage(`⏳ جاري ترحيل واعتماد المتدرب سحابياً: ${traineeName}...`);
 
   fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
+    method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      action: 'approveAttendance',
-      traineeId: traineeId,
-      traineeName: traineeName,
-      group: group,
-      date: dateStr,
-      time: curTimeStr,
-      status: selectedStatus,
-      username: CURRENT_USER || "مسؤول الحركة"
+      action: 'approveAttendance', traineeId: traineeId, traineeName: traineeName,
+      group: group, date: dateStr, time: curTimeStr, status: selectedStatus, username: CURRENT_USER
     })
   })
   .then(() => {
-    const sessionKey = `${traineeId}_${dateStr}`;
-    SESSION_APPROVED_IDS.add(sessionKey);
-    
+    const globalKey = `${traineeId}_${dateStr}`;
+    CLOUD_APPROVED_SET.add(globalKey); // قفل أمان فوري محلياً لحين التحديث القادم
     showToastMessage(`✅ تم توثيق حركة (${selectedStatus}) بنجاح للمتدرب: ${traineeName}`);
     filterLogsData();
-    setTimeout(fetchCsvFromGoogleSheets, 2500); 
+    executeAbsenceCheck();
+    setTimeout(forceFetchFreshData, 1500); 
   })
-  .catch(() => {
-    alert('❌ حدث خطأ في الاتصال بالبوابة السحابية للأعتماد!');
-  });
+  .catch(() => { alert('❌ حدث خطأ في ترحيل البيانات!'); });
 }
 
-// ==================== ABSENCE MOTOR (معزولة بالكامل ومزودة بزر التصدير) ====================
+// ==================== ENGINE UPDATE: ABSENCE SYSTEM ====================
 function executeAbsenceCheck() {
   const targetDate = document.getElementById('absence-check-date').value;
   const tbody      = document.getElementById('absence-table-body');
   const summary    = document.getElementById('absence-summary');
-  
-  if(!targetDate) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">📅 يرجى اختيار تاريخ محدد لبدء الفحص التلقائي.</td></tr>';
-    return;
-  }
+  if(!targetDate) return;
 
-  // عزل المعرفات التي تمتلك حركات حضور فعلي في هذا التاريخ
   const presentIds = new Set(
-    SERVER_DATA
-      .filter(r => r.date.trim() === targetDate.trim() && (r.type.trim() === 'حضور' || r.type.trim() === 'تأخير' || r.type.trim() === 'انصراف'))
-      .map(r => String(r.id).trim())
+    SERVER_DATA.filter(r => r.date === targetDate && (r.type === 'حضور' || r.type === 'تأخير')).map(r => String(r.id).trim())
   );
 
-  const absentList = SYSTEM_TRAINEES.filter(t => !presentIds.has(String(t.id).trim()));
+  // التعديل: إخفاء واستبعاد أي متدرب تم اتخاذ إجراء الموافقة والاعتماد له سحابياً لمنع التكرار والتشتت
+  const absentList = SYSTEM_TRAINEES.filter(t => {
+    const tIdClean = String(t.id).trim();
+    const globalKey = `${tIdClean}_${targetDate}`;
+    if(CLOUD_APPROVED_SET.has(globalKey)) return false; // تم اعتماده مسبقاً، فيحذف تلقائياً من كشف الغياب
+    return !presentIds.has(tIdClean);
+  });
 
-  summary.innerHTML = `
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
-      <span class="badge badge-green">✅ إجمالي حاضرين هذا التاريخ: ${SYSTEM_TRAINEES.length - absentList.length}</span>
-      <span class="badge badge-red">❌ إجمالي غائبين هذا التاريخ: ${absentList.length}</span>
-    </div>`;
+  summary.innerHTML = `<span class="badge badge-red">❌ إجمالي غائبين بانتظار الإجراء التدريبي: ${absentList.length}</span>`;
 
   if(!absentList.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--green); font-weight:700;">✅ حضور كامل 100% لتاريخ (${targetDate}) ولا توجد حالات غياب للرصد!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--green); font-weight:700;">✅ لوحة غياب نظيفة ومكتملة تماماً!</td></tr>`;
     return;
   }
 
-  // عرض الجدول نظيفاً وبدون وجود أي أزرار تسجيل فرعية تمنع التكرار والتداخل
   tbody.innerHTML = absentList.map(t => `
     <tr>
       <td style="color:var(--accent); font-weight:700">${t.id || '—'}</td>
@@ -840,73 +787,44 @@ function executeAbsenceCheck() {
     </tr>`).join('');
 }
 
-// دالة تصدير كشف الغياب التلقائي إلى ملف Excel / CSV مستقل بنجاح واحترافية
 function exportAbsenteeReportToCSV() {
   const targetDate = document.getElementById('absence-check-date').value;
-  if(!targetDate) { alert('❌ يرجى تحديد تاريخ الكشف أولاً قبل التصدير!'); return; }
+  if(!targetDate) return;
+  const presentIds = new Set(SERVER_DATA.filter(r => r.date === targetDate && (r.type === 'حضور' || r.type === 'تأخير')).map(r => String(r.id).trim()));
+  const absentList = SYSTEM_TRAINEES.filter(t => !presentIds.has(String(t.id).trim()) && !CLOUD_APPROVED_SET.has(`${String(t.id).trim()}_${targetDate}`));
 
-  const presentIds = new Set(
-    SERVER_DATA
-      .filter(r => r.date.trim() === targetDate.trim() && (r.type.trim() === 'حضور' || r.type.trim() === 'تأخير' || r.type.trim() === 'انصراف'))
-      .map(r => String(r.id).trim())
-  );
-
-  const absentList = SYSTEM_TRAINEES.filter(t => !presentIds.has(String(t.id).trim()));
-
-  if(!absentList.length) { alert('✅ لا توجد حالات غياب لتصديرها لهذا التاريخ!'); return; }
-
-  // بناء هيكلية ملف الـ CSV المشفر بالبوم لفتحه مباشرة داخل الإكسل بدون مشاكل لغة
-  let csvContent = "\uFEFF"; 
-  csvContent += "معرف المتدرب,اسم المتدرب الكامل,المجموعة التدريبية,حالة الفحص لليوم\n";
-
-  absentList.forEach(t => {
-    csvContent += `"${t.id}","${t.name}","${t.group}","غياب غير معتمد"\n`;
-  });
+  let csvContent = "\uFEFFمعرف المتدرب,اسم المتدرب الكامل,المجموعة التدريبية,حالة الفحص لليوم\n";
+  absentList.forEach(t => { csvContent += `"${t.id}","${t.name}","${t.group}","غياب غير معتمد"\n`; });
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  
-  link.setAttribute("href", url);
+  link.setAttribute("href", URL.createObjectURL(blob));
   link.setAttribute("download", `تقرير_غياب_المتدربين_${targetDate}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  showToastMessage(`📥 تم تحميل تقرير الغياب للتاريخ (${targetDate}) بنجاح!`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
-// ==================== MATERIAL & SETTINGS LOGIC ====================
 function saveMaterialContent() {
-  const txt      = document.getElementById('material-editor').value;
-  const day      = document.getElementById('material-day-select').value;
-  const date     = document.getElementById('material-date-input').value;
-  const trainer  = document.getElementById('material-trainer').value.trim();
-
-  if(!date || !trainer) { alert('❌ يرجى ملء حقول التاريخ والمدرب أولاً!'); return; }
-
-  LOCAL_MATERIALS[day] = { content: txt, materialDate: date, trainer, username: CURRENT_USER };
-  localStorage.setItem('local_materials', JSON.stringify(LOCAL_MATERIALS));
-
+  const txt = document.getElementById('material-editor').value;
+  const day = document.getElementById('material-day-select').value;
+  const date = document.getElementById('material-date-input').value;
+  const trainer = document.getElementById('material-trainer').value.trim();
+  if(!date || !trainer) return;
+  
   if(GOOGLE_SCRIPT_URL) {
     fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action:'updateMaterial', content:txt, dayNumber:day, materialDate:date, trainer, username:CURRENT_USER })
-    }).then(() => {
-      alert(`✅ تم حفظ وبيانات الحقيبة التدريبية لـ (${day}) بنجاح!`);
-    });
+    }).then(() => { alert(`✅ تم حفظ الحقيبة لـ (${day})`); });
   }
 }
 
 function saveSystemSettings() {
-  GOOGLE_CSV_URL    = document.getElementById('cfg-csv-url').value.trim();
+  GOOGLE_CSV_URL = document.getElementById('cfg-csv-url').value.trim();
   GOOGLE_SCRIPT_URL = document.getElementById('cfg-script-url').value.trim();
   localStorage.setItem('dash_google_csv', GOOGLE_CSV_URL);
   localStorage.setItem('dash_script_url', GOOGLE_SCRIPT_URL);
-  alert('⚙️ تم حفظ إعدادات الربط بنجاح!');
-  fetchCsvFromGoogleSheets();
+  alert('⚙️ تم حفظ إعدادات الربط بنجاح!'); forceFetchFreshData();
 }
 </script>
 </body>
