@@ -1,481 +1,1188 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المنظومة المتكاملة لإدارة التدريب وحصر الحضور والغياب</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-main: #0B132B;
-            --bg-card: #1C2541;
-            --accent-blue: #00B4D8;
-            --accent-green: #06D6A0;
-            --accent-red: #EF476F;
-            --accent-orange: #FFD166;
-            --text-light: #F4F5F7;
-            --text-muted: #A5A5A5;
-            --border-color: #3A506B;
-        }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg-main); color: var(--text-light); padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; }
-        
-        header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; }
-        header h1 { color: var(--accent-blue); font-size: 28px; }
-        header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
-        
-        /* شريط التنقّل العلوي */
-        nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
-        nav button { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-light); padding: 12px 22px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; transition: 0.3s; }
-        nav button:hover, nav button.active { background-color: var(--accent-blue); color: var(--bg-main); font-weight: bold; border-color: var(--accent-blue); }
-        
-        .tab-content { display: none; background-color: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .tab-content.active { display: block; }
-        
-        /* كروت الإحصائيات الحيوية */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        .stat-card h3 { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
-        .stat-card .value { font-size: 28px; font-weight: bold; color: var(--accent-blue); }
-        
-        /* أدوات التصفية والبحث */
-        .filter-zone { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background-color: rgba(11, 19, 43, 0.6); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--accent-blue); font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 10px; background-color: var(--bg-main); border: 1px solid var(--border-color); color: white; border-radius: 6px; font-size: 15px; transition: 0.3s; }
-        input:focus, select:focus { border-color: var(--accent-blue); outline: none; }
-        textarea { height: 100px; resize: vertical; }
-        
-        /* أزرار الإجراءات */
-        .btn-submit { background-color: var(--accent-green); color: var(--bg-main); padding: 12px 25px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
-        .btn-submit:hover { opacity: 0.9; box-shadow: 0 0 10px rgba(6, 214, 160, 0.4); }
-        
-        /* الجداول والتصميم المتجاوب */
-        .table-container { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
-        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 800px; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-        th { background-color: #111A35; color: var(--accent-blue); font-weight: bold; position: sticky; top: 0; }
-        tr:hover { background-color: rgba(255,255,255,0.02); }
-        
-        /* أزرار الحضور داخل الجدول */
-        .action-btn { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; margin-left: 5px; transition: 0.2s; color: #0B132B; }
-        .btn-present { background-color: var(--accent-green); }
-        .btn-absent { background-color: var(--accent-red); }
-        .btn-late { background-color: var(--accent-orange); }
-        .action-btn:hover { opacity: 0.8; transform: scale(1.05); }
-        
-        /* شارات الحالة */
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-block; }
-        .status-present { background-color: rgba(6, 214, 160, 0.15); color: var(--accent-green); }
-        .status-absent { background-color: rgba(239, 71, 111, 0.15); color: var(--accent-red); }
-        .status-late { background-color: rgba(255, 209, 102, 0.15); color: var(--accent-orange); }
-        
-        #statusMessage { padding: 12px; border-radius: 6px; margin-top: 15px; text-align: center; display: none; font-weight: bold; }
-        .loading-spinner { text-align: center; padding: 20px; color: var(--accent-blue); font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام التدريب | لوحة وحدة دعم القنوات الرقمية</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+  :root {
+    --bg:#0a0f1e; --card:#111827; --card2:#1a2235;
+    --accent:#00d4ff; --accent2:#0066ff;
+    --green:#00e676; --red:#ff4444; --yellow:#ffd600;
+    --text:#e8f0fe; --muted:#8899aa; --border:rgba(0,212,255,0.15);
+  }
+  body.theme-midnight{--bg:#0b132b;--card:#1c2541;--card2:#3a506b;}
+  body.theme-charcoal{--bg:#121212;--card:#1e1e1e;--card2:#2d2d2d;}
+  body.theme-forest{--bg:#0a0f0d;--card:#131c19;--card2:#1f2e29;}
+  body.theme-light{--bg:#f0f4f8;--card:#ffffff;--card2:#e8edf4;--text:#1e293b;--muted:#64748b;--border:rgba(0,102,255,0.15);--accent:#0066ff;--accent2:#3b82f6;}
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
+  .container{max-width:1300px;margin:0 auto;padding:20px;display:none;}
+
+  /* Login */
+  #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:background 0.3s;}
+  .login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;text-align:center;}
+  .login-logo{font-size:2rem;margin-bottom:8px;}
+  .login-title{font-size:1.3rem;font-weight:900;color:var(--accent);margin-bottom:4px;}
+  .login-sub{font-size:0.82rem;color:var(--muted);margin-bottom:24px;}
+
+  /* Header */
+  header{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--border);margin-bottom:25px;flex-wrap:wrap;gap:15px;}
+  .logo{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+  /* Connection status */
+  .conn-status{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;}
+  .conn-status.connected{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.25);}
+  .conn-status.disconnected{background:rgba(255,68,68,0.12);color:var(--red);border:1px solid rgba(255,68,68,0.25);}
+  .conn-dot{width:7px;height:7px;border-radius:50%;animation:pulse 1.5s infinite;}
+  .connected .conn-dot{background:var(--green);}
+  .disconnected .conn-dot{background:var(--red);animation:none;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:25px;background:var(--card);padding:6px;border-radius:14px;border:1px solid var(--border);width:fit-content;flex-wrap:wrap;}
+  .tab{padding:8px 20px;border-radius:10px;border:none;background:transparent;color:var(--muted);font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all .2s;}
+  .tab.active{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 4px 15px rgba(0,102,255,.3);}
+
+  .page{display:none;} .page.active{display:block;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-bottom:25px;}
+  .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px;}
+  .grid-charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px;}
+  @media(max-width:900px){.grid-charts{grid-template-columns:1fr;}}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;}
+  .card-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(128,128,128,.1);padding-bottom:8px;}
+
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;justify-content:space-between;}
+  .stat-info .num{font-size:2rem;font-weight:900;}
+  .stat-info .lbl{font-size:.8rem;color:var(--muted);}
+  .stat-icon-box{font-size:1.8rem;opacity:.7;}
+
+  /* Progress Indicators & Comparison */
+  .dashboard-extended { display: grid; grid-template-columns: 280px 1fr; gap: 20px; margin-bottom: 25px; }
+  @media(max-width:850px){ .dashboard-extended { grid-template-columns: 1fr; } }
+  
+  .circular-progress-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .circle-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+  .circle-svg circle { width: 100%; height: 100%; fill: none; stroke-width: 10; stroke-linecap: round; }
+  .circle-svg .bg-circle { stroke: rgba(255,255,255,0.05); }
+  .circle-svg .prog-circle { stroke: var(--accent); stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 1s ease-in-out; }
+  .circle-percentage { position: absolute; font-size: 1.6rem; font-weight: 900; color: var(--text); margin-top: -10px; }
+  
+  .compare-badge { margin-top: 10px; font-size: 0.85rem; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+  .compare-up { background: rgba(0, 230, 118, 0.15); color: var(--green); }
+  .compare-down { background: rgba(255, 68, 68, 0.15); color: var(--red); }
+  .compare-equal { background: rgba(255, 214, 0, 0.15); color: var(--yellow); }
+
+  /* Today stats */
+  .today-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .today-stat present{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .today-stat .ts-num{font-size:2.2rem;font-weight:900;line-height:1;}
+  .today-stat .ts-lbl{font-size:.78rem;color:var(--muted);margin-top:4px;}
+  .today-stat.present .ts-num{color:var(--green);}
+  .today-stat.absent .ts-num{color:var(--red);}
+
+  .filter-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group label{font-size:.8rem;color:var(--muted);}
+  .form-control{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:.85rem;outline:none;width:100%;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;}
+  .btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+  .btn-excel { background: #107c41; color: white; }
+  .btn-excel:hover { background: #0b592e; }
+
+  /* Table & Pagination */
+  .table-wrap{overflow-x:auto;width:100%;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;text-align:right;}
+  th{background:var(--card2);color:var(--muted);padding:12px;border-bottom:1px solid var(--border);}
+  td{padding:11px 12px;border-bottom:1px solid rgba(128,128,128,.08);}
+  tr:hover td{background:rgba(0,212,255,.03);}
+
+  .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(128,128,128,0.1); }
+  .pagination-buttons { display: flex; gap: 5px; }
+
+  .badge{padding:3px 8px;border-radius:20px;font-size:.75rem;font-weight:700;display:inline-block;}
+  .badge-green{background:rgba(0,230,118,.15);color:var(--green);}
+  .badge-red{background:rgba(255,68,68,.15);color:var(--red);}
+  .badge-yellow{background:rgba(255,214,0,.15);color:var(--yellow);}
+  .badge-blue{background:rgba(0,212,255,.15);color:var(--accent);}
+
+  .status-select{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px;font-family:'Cairo';font-size:.8rem;}
+  .audit-text{font-size:.75rem;color:var(--muted);display:block;margin-top:2px;}
+  .chart-container{position:relative;height:220px;width:100%;}
+
+  /* 🛠️ تعديل مقاسات العرض: تكبير السجلات لـ 40% وتصغير الحقيبة لـ 60% */
+  .material-layout{display:grid;grid-template-columns:40% 60%;gap:20px;}
+  @media(max-width:950px){.material-layout{grid-template-columns:1fr;}}
+  .sidebar-panel{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:15px;max-height:650px;overflow-y:auto;}
+
+  /* Weekly progress and alerts */
+  .weekly-progress-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 20px; }
+  .wp-group-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; }
+  .wp-bar-bg { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; width: 60%; overflow: hidden; }
+  .wp-bar-fill { background: linear-gradient(90deg, var(--accent2), var(--accent)); height: 100%; width: 0%; transition: width 0.5s; }
+
+  .alert-box { background: rgba(255,68,68,0.08); border: 1px dashed var(--red); border-radius: 12px; padding: 15px; margin-bottom: 20px; display: none; }
+  .alert-box h5 { color: var(--red); font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .alert-list { font-size: 0.8rem; list-style: square inside; color: #fcc; }
+
+  /* Toast notification */
+  #toast { position: fixed; bottom: 20px; left: 20px; background: var(--card2); border: 1px solid var(--green); color: var(--text); padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10000; display: none; align-items: center; gap: 8px; font-size: 0.85rem; }
+
+  /* تكييف الجدول الجانبي لعرض النصوص كاملة دون قطع */
+  .day-table{width:100%; border-collapse:collapse; font-size:.8rem; table-layout: fixed;}
+  .day-table th{background:var(--card2); color:var(--muted); padding:10px 8px; border-bottom:1px solid var(--border); font-size:.8rem; text-align: right;}
+  .day-table td{padding:10px 8px; border-bottom:1px solid rgba(128,128,128,.08); vertical-align: top;}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>منظومة إدارة التدريب وحصر الحضور والغياب المتكاملة</h1>
-        <p>نظام متكامل للمزامنة مع جداول بيانات جوجل ورصد الحركات التدريبية تلقائياً</p>
-    </header>
+<div id="toast">🟢 <span id="toast-text">تم تحديث البيانات بنجاح</span></div>
 
-    <nav>
-        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="active">📊 لوحة رصد الحضور والغياب</button>
-        <button onclick="switchTab('material')" id="tab-material">📝 تفاصيل الحقيبة والمادة التدريبية</button>
-        <button onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط والمستخدمين</button>
-    </nav>
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">تسجيل الدخول للنظام</div>
+    <div class="login-sub">نظام التدريب | وحدة دعم القنوات الرقمية للحضور والتدريب</div>
+    <div class="form-group" style="margin-bottom:15px;text-align:right;">
+      <label>اسم المستخدم</label>
+      <input type="text" id="login-user" class="form-control" placeholder="أدخل اسم المستخدم...">
+    </div>
+    <div class="form-group" style="margin-bottom:25px;text-align:right;">
+      <label>كلمة المرور</label>
+      <input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="handleLogin()">دخول لوحة التحكم</button>
+    <p id="login-err" style="color:var(--red);font-size:.85rem;margin-top:15px;display:none;">❌ اسم المستخدم أو كلمة المرور غير صحيحة!</p>
+  </div>
+</div>
 
-    <div id="content-dashboard" class="tab-content active">
-        <div class="stats-grid">
-            <div class="stat-card"><h3>إجمالي المسجلين</h3><div class="value" id="stat-total">0</div></div>
-            <div class="stat-card"><h3>حضور اليوم</h3><div class="value" id="stat-present" style="color:var(--accent-green);">0</div></div>
-            <div class="stat-card"><h3>غياب اليوم</h3><div class="value" id="stat-absent" style="color:var(--accent-red);">0</div></div>
-            <div class="stat-card"><h3>التأخيرات</h3><div class="value" id="stat-late" style="color:var(--accent-orange);">0</div></div>
-        </div>
+<div class="container" id="main-container">
 
-        <div class="filter-zone">
-            <div class="form-group">
-                <label>بحث باسم المتدرب أو الرقم:</label>
-                <input type="text" id="searchBar" onkeyup="filterTrainees()" placeholder="اكتب للبحث...">
-            </div>
-            <div class="form-group">
-                <label>تصفية بالمجموعة:</label>
-                <select id="groupFilter" onchange="filterTrainees()">
-                    <option value="all">كل المجموعات</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>تاريخ اليوم المراد رصده:</label>
-                <input type="date" id="attendanceDate" onchange="loadTraineesData()">
-            </div>
-            <div class="form-group" style="display: flex; align-items: flex-end;">
-                <button class="btn-submit" style="background-color: var(--accent-blue);" onclick="loadTraineesData()">🔄 تحديث وجلب البيانات</button>
-            </div>
-        </div>
+  <header>
+    <div>
+      <div class="logo">📊 لوحة الحضور الذكية </div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px;">
+        المستخدم: <strong id="current-user-display" style="color:var(--accent)">—</strong>
+        &nbsp;|&nbsp;
+        <span id="conn-status-badge" class="conn-status disconnected"><span class="conn-dot"></span>غير متصل</span>
+        &nbsp;|&nbsp;
+        ⏱️ <span id="last-update-time" style="color:var(--yellow)">لم يتم التحديث</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="toggleTheme()">🎨 تغيير درجة الخلفية</button>
+      <button class="btn btn-ghost" onclick="fetchCsvFromGoogleSheets()">🔄 تحديث فوري</button>
+      <button class="btn btn-primary" style="background:var(--red);" onclick="handleLogout()">🚪 خروج</button>
+    </div>
+  </header>
 
-        <div class="table-container">
-            <div id="loadingGrid" class="loading-spinner" style="display:none;">جاري تحميل سجل المتدربين من شيت جوجل...</div>
-            <table id="traineesTable">
-                <thead>
-                    <tr>
-                        <th>الرقم الأكاديمي</th>
-                        <th>اسم المتدرب</th>
-                        <th>المجموعة</th>
-                        <th>التاريخ</th>
-                        <th>الحالة الحالية</th>
-                        <th>المستخدم المعدل</th>
-                        <th>إجراءات الرصد السريع</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted);">يرجى ضبط روابط الاتصال وأسماء المستخدمين في تبويب الإعدادات أولاً.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="tabs" id="main-tabs">
+    <button class="tab active" onclick="switchTab('dashboard')">📈 الإحصائيات اليومية</button>
+    <button class="tab" onclick="switchTab('logs')">📋 السجل العام</button>
+    <button class="tab" onclick="switchTab('absence')">📊 كشف الغياب التلقائي</button>
+    <button class="tab" onclick="switchTab('material')">📚 المادة التدريبية</button>
+    <button class="tab admin-only" onclick="switchTab('settings')" id="tab-settings">⚙️ الإعدادات والربط</button>
+  </div>
+
+  <div id="page-dashboard" class="page active">
+    
+    <div class="alert-box" id="consecutive-absence-box">
+      <h5>⚠️ تنبيه نظام المتابعة: متدربين غائبين لـ 3 أيام متتالية أو أكثر</h5>
+      <ul class="alert-list" id="consecutive-absence-list"></ul>
     </div>
 
-    <div id="content-material" class="tab-content">
-        <h2>📝 إضافة وتحديث تفاصيل المادة التدريبية اليومية</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-            <div class="form-group">
-                <label>اليوم التدريبي (رقم اليوم):</label>
-                <select id="matDayNumber" onchange="loadSpecificDayMaterial()">
-                    <option value="1">اليوم الأول</option>
-                    <option value="2">اليوم الثاني</option>
-                    <option value="3">اليوم الثالث</option>
-                    <option value="4">اليوم الرابع</option>
-                    <option value="5">اليوم الخامس</option>
-                    <option value="6">اليوم السادس</option>
-                    <option value="7">اليوم السابع</option>
-                    <option value="8">اليوم الثامن</option>
-                    <option value="9">اليوم التاسع</option>
-                    <option value="10">اليوم العاشر</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>التاريخ المعتمد للحقيبة:</label>
-                <input type="date" id="matDate">
-            </div>
+    <div class="dashboard-extended">
+      <div class="circular-progress-box">
+        <div style="font-size:0.8rem; color:var(--muted); margin-bottom:10px; font-weight:bold;">نسبة الحضور الكلية</div>
+        <div style="display:flex; align-items:center; justify-content:center; position:relative;">
+          <svg class="circle-svg">
+            <circle class="bg-circle" cx="70" cy="70" r="60"></circle>
+            <circle class="prog-circle" id="circular-progress-bar" cx="70" cy="70" r="60"></circle>
+          </svg>
+          <div class="circle-percentage" id="circular-progress-text">0%</div>
         </div>
-        <div class="form-group">
-            <label>محتوى وتفاصيل الحقيبة المضافة:</label>
-            <textarea id="matContent" placeholder="اكتب هنا محاور التدريب، العناوين الرئيسية، والأنشطة الخاصة بهذا اليوم..."></textarea>
-        </div>
-        <button class="btn-submit" onclick="submitMaterialForm()">📤 حفظ وتحديث تفاصيل اليوم التدريبي</button>
+        <div class="compare-badge" id="attendance-compare-badge">—</div>
+      </div>
 
-        <h3 style="margin-top: 35px; color: var(--accent-blue);">📋 السجل التاريخي للحقائب والمواد المدخلة</h3>
-        <div class="table-container">
-            <table id="materialTable">
-                <thead>
-                    <tr>
-                        <th>اليوم التدريبي</th>
-                        <th>التاريخ المعتمد</th>
-                        <th>محتوى وتفاصيل الحقيبة المضافة</th>
-                        <th>بواسطة المشرف</th>
-                        <th>وقت الإجراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-muted);">يرجى تهيئة الروابط لجلب سجل الحقائب...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+      <div class="weekly-progress-section">
+        <h4 style="font-size:0.9rem; margin-bottom:12px; color:var(--accent);">📈 شريط تقدم الخطة التدريبية (لكل مجموعة)</h4>
+        <div id="weekly-progress-rows-container"></div>
+      </div>
     </div>
 
-    <div id="content-settings" class="tab-content">
-        <h2>⚙️ روابط تهيئة الاتصال والمزامنة والمستخدمين</h2>
-        
-        <div class="form-group" style="margin-top: 15px;">
-            <label>1. رابط جوجل شيت المباشر المصدر (CSV Link):</label>
-            <input type="text" id="csvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+    <div class="grid-3">
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="num" id="st-total-records" style="color:var(--accent)">0</div>
+          <div class="lbl">إجمالي الحركات الكلية</div>
         </div>
-        
-        <div class="form-group">
-            <label>2. رابط بوابة التعديل البرمجية (Google Apps Script Web App URL):</label>
-            <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        <div class="stat-icon-box">📋</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="num" id="st-unique-trainees" style="color:var(--green)">0</div>
+          <div class="lbl">عدد المتدربين المسجلين</div>
         </div>
-        
-        <div class="form-group" style="background-color: rgba(0, 180, 216, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--accent-blue);">
-            <label style="font-weight: bold; font-size: 15px;">👤 هوية المستخدم (المشرف المسؤول عن الرصد حالياً):</label>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">الاسم المكتوب هنا سيتم ترحيله تلقائياً إلى شيت جوجل في عمود "المعدل بواسطة" عند ضغط أزرار الحضور.</p>
-            <input type="text" id="usernameInput" value="المشرف المسؤول">
+        <div class="stat-icon-box">👥</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="num" id="st-today-count" style="color:var(--yellow)">0</div>
+          <div class="lbl">إجمالي الحاضرين اليوم</div>
         </div>
-        
-        <button class="btn-submit" onclick="saveSettings()">💾 حفظ إعدادات التهيئة والربط والمستخدم</button>
-        <div id="statusMessage"></div>
+        <div class="stat-icon-box">✅</div>
+      </div>
     </div>
+
+    <div class="today-stats">
+      <div class="today-stat present">
+        <div class="ts-num" id="st-today-present">0</div>
+        <div class="ts-lbl">✅ حالات الحضور اليوم</div>
+      </div>
+      <div class="today-stat absent">
+        <div class="ts-num" id="st-today-absent">0</div>
+        <div class="ts-lbl">❌ حالات الغياب اليوم</div>
+      </div>
+    </div>
+
+    <div class="grid-charts">
+      <div class="card">
+        <div class="card-title">📊 توزيع الحضور للمجموعات التدريبية</div>
+        <div class="chart-container"><canvas id="groupPieChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 منحنى حركات الحضور اليوم</div>
+        <div class="chart-container"><canvas id="dailyLineChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-logs" class="page">
+    <div class="filter-panel">
+      <div class="form-group">
+        <label>🔍 بحث بالاسم أو Training ID</label>
+        <input type="text" id="flt-search" class="form-control" placeholder="اكتب للبحث..." oninput="resetPaginationAndFilter()">
+      </div>
+      <div class="form-group">
+        <label>👥 تصفية حسب المجموعة</label>
+        <select id="flt-group" class="form-control" onchange="resetPaginationAndFilter()"><option value="ALL">كل المجموعات</option></select>
+      </div>
+      <div class="form-group">
+        <label>🟢 الحالة</label>
+        <select id="flt-type" class="form-control" onchange="resetPaginationAndFilter()">
+          <option value="ALL">الكل</option>
+          <option value="حضور">حضور</option>
+          <option value="انصراف">انصراف</option>
+          <option value="تأخير">تأخير</option>
+          <option value="غياب">غياب</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>📅 التاريخ</label>
+        <input type="date" id="flt-date" class="form-control" onchange="resetPaginationAndFilter()">
+      </div>
+      <button class="btn btn-excel" onclick="exportToExcelFormat()">📥 تصدير السجل لـ Excel</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 السجل العام الشامل</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Training ID</th>
+              <th>اسم المتدرب</th>
+              <th>المجموعة</th>
+              <th>التاريخ</th>
+              <th>الوقت</th>
+              <th>نوع الحركة</th>
+              <th>المعدل بواسطة</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table-body"></tbody>
+        </table>
+      </div>
+      
+      <div class="pagination-container">
+        <div style="font-size: 0.8rem; color: var(--muted);" id="pagination-info">عرض 0 من أصل 0 سجل</div>
+        <div class="pagination-buttons">
+          <button class="btn btn-ghost" style="padding: 4px 12px;" onclick="changePage(-1)">السابق</button>
+          <button class="btn btn-primary" style="padding: 4px 12px;" id="current-page-num">1</button>
+          <button class="btn btn-ghost" style="padding: 4px 12px;" onclick="changePage(1)">التالي</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="page-absence" class="page">
+    <div class="card">
+      <div class="card-title">🔍 نظام الكشف التلقائي الذكي عن الغائبين</div>
+      <div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;background:var(--card2);padding:15px;border-radius:10px;margin-bottom:15px;">
+        <div class="form-group" style="min-width:220px;">
+          <label>📅 اختر تاريخ الفحص</label>
+          <input type="date" id="absence-check-date" class="form-control">
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="executeAbsenceCheck()">🔍 بدء الفحص التلقائي</button>
+      </div>
+      <div id="absence-summary" style="margin-bottom:12px;"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Training ID</th>
+              <th>اسم المتدرب</th>
+              <th>المجموعة</th>
+              <th>الحالة</th>
+              <th>تحويل الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="absence-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-material" class="page">
+    <div class="material-layout">
+      <div class="sidebar-panel">
+        <h4 style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">📅 السجلات الحالية باليوم</h4>
+        <div id="days-table-container">
+          <div style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px;">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-title">📚 تفاصيل وإدارة محتوى الحقيبة التدريبية اليومية</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+          <div class="form-group">
+            <label>📅 اليوم التدريبي:</label>
+            <select id="material-day-select" class="form-control">
+              <option value="اليوم الأول">اليوم الأول - 1</option>
+              <option value="اليوم الثاني">اليوم الثاني - 2</option>
+              <option value="اليوم الثالث">اليوم الثالث - 3</option>
+              <option value="اليوم الرابع">اليوم الرابع - 4</option>
+              <option value="اليوم الخامس">اليوم الخامس - 5</option>
+              <option value="اليوم السادس">اليوم السادس - 6</option>
+              <option value="اليوم السابع">اليوم السابع - 7</option>
+              <option value="اليوم الثامن">اليوم الثامن - 8</option>
+              <option value="اليوم التاسع">اليوم التاسع - 9</option>
+              <option value="اليوم العاشر">اليوم العاشر - 10</option>
+              <option value="اليوم الحادي عشر">اليوم الحادي عشر - 11</option>
+              <option value="اليوم الثاني عشر">اليوم الثاني عشر - 12</option>
+              <option value="اليوم الثالث عشر">اليوم الثالث عشر - 13</option>
+              <option value="اليوم الرابع عشر">اليوم الرابع عشر - 14</option>
+              <option value="اليوم الخامس عشر">اليوم الخامس عشر - 15</option>
+              <option value="اليوم السادس عشر">اليوم السادس عشر - 16</option>
+              <option value="اليوم السابع عشر">اليوم السابع عشر - 17</option>
+              <option value="اليوم الثامن عشر">اليوم الثامن عشر - 18</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>📆 تاريخ اليوم التدريبي:</label>
+            <input type="date" id="material-date-input" class="form-control">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:15px;">
+          <div class="form-group">
+            <label>👨‍🏫 اسم المدرب / المدربين:</label>
+            <input type="text" id="material-trainer" class="form-control" placeholder="مثال: أحمد محمد">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+          <label>📝 محتوى وتفاصيل المادة التدريبية:</label>
+          <textarea id="material-editor" class="form-control" style="min-height:140px;font-size:0.95rem;" placeholder="اكتب تفاصيل المادة والمحاور هنا..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+          <label>📌 ملاحظات وعقبات إدارية خاصة بهذا اليوم:</label>
+          <textarea id="material-notes" class="form-control" style="min-height:80px;font-size:0.95rem;" placeholder="اكتب أي ملاحظات خاصة أو مشاكل فنية حدثت اليوم..."></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div id="material-audit-info" style="font-size:.8rem;color:var(--muted);">آخر تعديل بواسطة: — في —</div>
+          <button class="btn btn-primary" onclick="saveMaterialContent()">💾 حفظ وإرسال للغيمة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-settings" class="page">
+    <div class="card">
+      <div class="card-title">⚙️ إعدادات الاتصال والمزامنة (Admin فقط)</div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label>1. رابط جوجل شيت المباشر (CSV Link):</label>
+        <input type="text" id="cfg-csv-url" class="form-control">
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>2. رابط بوابة التعديل البرمجية (Apps Script URL):</label>
+        <input type="text" id="cfg-script-url" class="form-control">
+      </div>
+      <button class="btn btn-primary" onclick="saveSystemSettings()">💾 حفظ الإعدادات</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-    let rawTraineesData = []; // لتخزين البيانات المستوردة خام
+// ==================== CONFIG ====================
+const APPROVED_USERS = {
+  "admin":     "1234",
+  "k.bobshan": "1234",
+  "b.krier":   "1234",
+  "o.alhoeg":  "1234",
+  "h.ezgele":  "1234"
+};
 
-    // تعيين تاريخ اليوم تلقائياً عند الفتح
-    document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
+let GOOGLE_CSV_URL    = localStorage.getItem('dash_google_csv')    || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ7oboudTsfqeW4IflcLUg8FMRJpzMA2Umj_afcQIjLfRmrbAhotbmfeNuvmli_fg_QMUkKxiqtfQK/pub?gid=720402532&single=true&output=csv';
+let GOOGLE_SCRIPT_URL = localStorage.getItem('dash_script_url')    || 'https://script.google.com/macros/s/AKfycbxhYotI8jCptoz6RtWiTOBO_eeS_RzTUqktkmh15Qx70VZoXeW0zm6r9j01pYPOKvXP/exec';
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById('content-' + tabId).classList.add('active');
-        document.getElementById('tab-' + tabId).classList.add('active');
-        
-        if (tabId === 'dashboard') { loadTraineesData(); }
-        if (tabId === 'material') { loadSpecificDayMaterial(); loadMaterialTable(); }
+let SERVER_DATA     = [];
+let SYSTEM_TRAINEES = [];
+let FILTERED_DATA   = [];
+let SYSTEM_GROUPS   = new Set();
+let CURRENT_USER    = "";
+
+// Pagination Settings
+let currentPage = 1;
+const rowsPerPage = 25;
+
+// Security Timeout Tracker (1 Hour = 3,600,000 ms)
+let inactivityTimer;
+const INACTIVITY_TIMEOUT = 3600000; 
+
+const THEMES = ['default','theme-midnight','theme-charcoal','theme-forest','theme-light'];
+let currentThemeIdx = 0;
+
+let chartPie  = null;
+let chartLine = null;
+
+let LOCAL_MATERIALS = JSON.parse(localStorage.getItem('local_materials') || '{}');
+
+// ==================== INACTIVITY TRIGGER ====================
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  if (CURRENT_USER !== "") {
+    inactivityTimer = setTimeout(handleAutomaticLogout, INACTIVITY_TIMEOUT);
+  }
+}
+
+function handleAutomaticLogout() {
+  alert("⚠️ تم تسجيل خروجك تلقائياً لنفاذ مهلة النشاط الأمني (ساعة كاملة) حفاظاً على سلامة البيانات.");
+  handleLogout();
+}
+
+// Register activity event listeners
+['mousemove', 'mousedown', 'keydown', 'click', 'scroll', 'touchstart'].forEach(eventName => {
+  document.addEventListener(eventName, resetInactivityTimer, true);
+});
+
+// ==================== TOAST SYSTEM ====================
+function showToastMessage(text, isError = false) {
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toast-text');
+  toastText.innerText = text;
+  toast.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+  toast.style.display = 'flex';
+  setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+
+// ==================== AUTH ====================
+function handleLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if(APPROVED_USERS[u] && APPROVED_USERS[u] === p) {
+    CURRENT_USER = u;
+    document.getElementById('current-user-display').textContent = CURRENT_USER;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-container').style.display = 'block';
+    
+    const settingsTab = document.getElementById('tab-settings');
+    if(CURRENT_USER !== 'admin') {
+      settingsTab.style.display = 'none';
+    } else {
+      settingsTab.style.display = '';
     }
+    resetInactivityTimer();
+    initSystem();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
 
-    function saveSettings() {
-        localStorage.setItem('csvUrl', document.getElementById('csvUrlInput').value.trim());
-        localStorage.setItem('scriptUrl', document.getElementById('scriptUrlInput').value.trim());
-        localStorage.setItem('savedUsername', document.getElementById('usernameInput').value.trim());
-        
-        const msg = document.getElementById('statusMessage');
-        msg.style.display = 'block';
-        msg.style.backgroundColor = 'var(--accent-green)';
-        msg.style.color = '#0B132B';
-        msg.innerText = '✅ تم حفظ إعدادات المنظومة المتكاملة وتحديث اسم المستخدم المعتمد!';
-        setTimeout(() => { msg.style.display = 'none'; }, 4000);
-        loadTraineesData();
-    }
+function handleLogout() {
+  CURRENT_USER = "";
+  clearTimeout(inactivityTimer);
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-container').style.display = 'none';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
 
-    window.onload = function() {
-        if(localStorage.getItem('csvUrl')) document.getElementById('csvUrlInput').value = localStorage.getItem('csvUrl');
-        if(localStorage.getItem('scriptUrl')) document.getElementById('scriptUrlInput').value = localStorage.getItem('scriptUrl');
-        if(localStorage.getItem('savedUsername')) document.getElementById('usernameInput').value = localStorage.getItem('savedUsername');
-        loadTraineesData();
-    }
+function toggleTheme() {
+  document.body.classList.remove(...THEMES);
+  currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
+  if(THEMES[currentThemeIdx] !== 'default') {
+    document.body.classList.add(THEMES[currentThemeIdx]);
+  }
+}
 
-    // 📊 دالة جلب المتدربين ومعالجة الـ CSV وعرضهم بلوحة التحكم الأساسية
-    function loadTraineesData() {
-        const csvUrl = localStorage.getItem('csvUrl');
-        if (!csvUrl) return;
+// ==================== INIT ====================
+function initSystem() {
+  document.getElementById('cfg-csv-url').value    = GOOGLE_CSV_URL;
+  document.getElementById('cfg-script-url').value = GOOGLE_SCRIPT_URL;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('absence-check-date').value = today;
+  document.getElementById('flt-date').value            = today;
+  document.getElementById('material-date-input').value = today;
+  fetchCsvFromGoogleSheets();
+  loadMaterialContent();
+}
 
-        document.getElementById('loadingGrid').style.display = 'block';
-        const targetDate = document.getElementById('attendanceDate').value;
+function switchTab(tabId) {
+  if(tabId === 'settings' && CURRENT_USER !== 'admin') return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.onclick && b.onclick.toString().includes(`'${tabId}'`));
+  if(btn) btn.classList.add('active');
+  document.getElementById(`page-${tabId}`).classList.add('active');
+  if(tabId === 'dashboard') {
+    renderDashboardCharts();
+    updateWeeklyProgressBars();
+  }
+}
 
-        fetch(csvUrl + "&t=" + new Date().getTime()) // كسر الكاش لضمان جلب البيانات المحدثة فورا
-        .then(res => res.text())
-        .then(text => {
-            document.getElementById('loadingGrid').style.display = 'none';
-            parseAndBuildTable(text, targetDate);
-        }).catch(() => {
-            document.getElementById('loadingGrid').style.display = 'none';
-        });
-    }
+function setConnectionStatus(ok) {
+  const badge = document.getElementById('conn-status-badge');
+  if(ok) {
+    badge.className = 'conn-status connected';
+    badge.innerHTML = '<span class="conn-dot"></span>متصل بالإكسل';
+  } else {
+    badge.className = 'conn-status disconnected';
+    badge.innerHTML = '<span class="conn-dot"></span>فشل الاتصال';
+  }
+}
 
-    function parseAndBuildTable(csvText, targetDate) {
-        const lines = csvText.split('\n').map(line => line.split(','));
-        if(lines.length <= 1) return;
+// ==================== FETCH & PARSE DATA ====================
+function fetchCsvFromGoogleSheets() {
+  fetch(GOOGLE_CSV_URL + '&t=' + Date.now())
+  .then(res => {
+    if(!res.ok) throw new Error('فشل');
+    return res.text();
+  })
+  .then(csvText => {
+    setConnectionStatus(true);
+    parseCsvToData(csvText);
+    
+    // Timestamp update
+    const now = new Date();
+    document.getElementById('last-update-time').innerText = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    showToastMessage("📥 تم تحديث ومزامنة البيانات حياً من Google Sheets الكلي بنجاح!");
+  })
+  .catch(() => {
+    setConnectionStatus(false);
+    showToastMessage("❌ فشل الاتصال بخوادم جوجل شيت، تحقق من روابط الـ CSV المفتوحة", true);
+  });
+}
 
-        const headers = lines[0].map(h => h.replace(/"/g, '').toLowerCase().trim());
-        
-        // البحث عن مؤشرات الأعمدة داخل الشيت
-        let idxId = headers.findIndex(h => h.includes('id') || h.includes('رقم') || h.includes('الأكاديمي'));
-        let idxName = headers.findIndex(h => h.includes('name') || h.includes('اسم'));
-        let idxGroup = headers.findIndex(h => h.includes('group') || h.includes('مجموعة'));
-        let idxDate = headers.findIndex(h => h.includes('date') || h.includes('تاريخ'));
-        let idxType = headers.findIndex(h => h.includes('type') || h.includes('حركة') || h.includes('الحالة'));
-        let idxUser = headers.findIndex(h => h.includes('user') || h.includes('المستخدم') || h.includes('المعدل'));
+function parseCsvToData(csvText) {
+  const lines = csvText.split(/\r?\n/);
+  if(lines.length < 2) return;
 
-        if(idxId === -1) idxId = 0; if(idxName === -1) idxName = 1; if(idxGroup === -1) idxGroup = 2;
-        if(idxDate === -1) idxDate = 3; if(idxType === -1) idxType = 5; if(idxUser === -1) idxUser = 6;
+  let tempRecords = [];
+  let tempTraineesMap = new Map();
+  SYSTEM_GROUPS.clear();
 
-        rawTraineesData = [];
-        const groups = new Set();
-        let total = 0, present = 0, absent = 0, late = 0;
+  const headers = lines[0].split(',').map(h => h.replace(/["']/g,"").trim());
 
-        for (let i = 1; i < lines.length; i++) {
-            if (lines[i].length <= 1 || !lines[i][idxName]) continue;
+  let idxRowId    = 0;
+  let idxTime     = headers.findIndex(h => h.includes('وقت') || h.includes('البدء'));
+  let idxName     = headers.findIndex(h => h.includes('الاسم') || h.toLowerCase().includes('name'));
+  let idxTrainId  = headers.findIndex(h => h.toLowerCase().includes('training'));
+  let idxType     = headers.findIndex(h => h.includes('اختيار') || h.includes('الخيارات') || h.includes('الحالة'));
+  let idxGroup    = headers.findIndex(h => h.includes('مجموعة'));
+  let idxUser     = headers.findIndex(h => h.includes('المعدل') || h.includes('user'));
 
-            let rowDate = lines[i][idxDate] ? lines[i][idxDate].replace(/"/g, '').trim() : '';
-            let cleanRowDate = rowDate.replace(/\//g, '-');
+  if(idxTime    === -1) idxTime    = 1;
+  if(idxName    === -1) idxName    = 2;
+  if(idxTrainId === -1) idxTrainId = 3;
+  if(idxType    === -1) idxType    = 4;
+  if(idxGroup   === -1) idxGroup   = 5;
 
-            let item = {
-                id: lines[i][idxId] ? lines[i][idxId].replace(/"/g, '').trim() : '',
-                name: lines[i][idxName] ? lines[i][idxName].replace(/"/g, '').trim() : '',
-                group: lines[i][idxGroup] ? lines[i][idxGroup].replace(/"/g, '').trim() : 'المجموعة الأولى',
-                date: rowDate,
-                status: lines[i][idxType] ? lines[i][idxType].replace(/"/g, '').trim() : 'لم يرصد',
-                user: lines[i][idxUser] ? lines[i][idxUser].replace(/"/g, '').trim() : '—'
-            };
+  for(let i = 1; i < lines.length; i++) {
+    if(!lines[i].trim()) continue;
+    let cols = lines[i].match(/(".*?"|[^",]+|(?<=,)(?=,))/g) || lines[i].split(',');
+    cols = cols.map(c => c.replace(/^"|"$/g,'').trim());
+    if(cols.length < 2) continue;
 
-            groups.add(item.group);
-            total++;
+    const rawType = cols[idxType] || '';
+    let recType = 'حضور';
+    if(rawType.includes('الخروج') || rawType.includes('انصراف')) recType = 'انصراف';
+    else if(rawType.includes('الدخول') || rawType.includes('حضور')) recType = 'حضور';
+    else if(rawType.includes('تأخير')) recType = 'تأخير';
+    else if(rawType.includes('غياب')) recType = 'غياب';
+    else if(rawType) recType = rawType;
 
-            if (cleanRowDate === targetDate) {
-                if (item.status.includes('حاضر')) present++;
-                else if (item.status.includes('غائب')) absent++;
-                else if (item.status.includes('متأخر')) late++;
-            }
-
-            rawTraineesData.push(item);
+    const timeRaw = cols[idxTime] || '';
+    let datePart = '', timePart = '';
+    if(timeRaw.includes(' ')) {
+      const parts = timeRaw.split(' ');
+      datePart = parts[0];
+      timePart = parts[1] || '';
+      if(datePart.includes('/')) {
+        const dp = datePart.split('/');
+        if(dp.length === 3) {
+          const m = dp[0].padStart(2,'0'), d = dp[1].padStart(2,'0'), y = dp[2];
+          datePart = `${y}-${m}-${d}`;
         }
-
-        document.getElementById('stat-total').innerText = total;
-        document.getElementById('stat-present').innerText = present;
-        document.getElementById('stat-absent').innerText = absent;
-        document.getElementById('stat-late').innerText = late;
-
-        const selectFilter = document.getElementById('groupFilter');
-        selectFilter.innerHTML = '<option value="all">كل المجموعات</option>';
-        groups.forEach(g => { if(g) selectFilter.innerHTML += `<option value="${g}">${g}</option>`; });
-
-        renderTable(rawTraineesData);
+      }
+    } else {
+      datePart = timeRaw;
     }
 
-    function renderTable(dataList) {
-        const tbody = document.querySelector('#traineesTable tbody');
-        tbody.innerHTML = '';
+    const trainId = cols[idxTrainId] || cols[idxRowId] || '';
+    const name    = cols[idxName]    || '';
+    const group   = cols[idxGroup]   || 'المجموعة العامة';
 
-        if(dataList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">لا توجد بيانات مطابقة لخيارات البحث الحالية...</td></tr>`;
-            return;
-        }
+    let rec = {
+      id:        trainId,
+      name:      name,
+      group:     group,
+      date:      datePart,
+      time:      timePart,
+      type:      recType,
+      changedBy: idxUser !== -1 ? (cols[idxUser] || 'تلقائي') : 'تلقائي'
+    };
 
-        dataList.forEach(item => {
-            let badgeClass = 'status-present';
-            if (item.status.includes('غائب')) badgeClass = 'status-absent';
-            if (item.status.includes('متأخر')) badgeClass = 'status-late';
+    if(!rec.id && !rec.name) continue;
+    tempRecords.push(rec);
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><b>${item.id}</b></td>
-                <td>${item.name}</td>
-                <td>${item.group}</td>
-                <td>${item.date || '—'}</td>
-                <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
-                <td style="font-size:12px; color:var(--text-muted);">${item.user}</td>
-                <td>
-                    <button class="action-btn btn-present" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'حاضر')">حاضر</button>
-                    <button class="action-btn btn-absent" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'غائب')">غائب</button>
-                    <button class="action-btn btn-late" onclick="changeStatus('${item.id}', '${item.name}', '${item.group}', 'متأخر')">متأخر</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+    const key = String(rec.id).trim() || rec.name;
+    if(key && !tempTraineesMap.has(key)) {
+      tempTraineesMap.set(key, { id: rec.id, name: rec.name, group: rec.group });
+    }
+    if(rec.group) SYSTEM_GROUPS.add(rec.group);
+  }
+
+  SERVER_DATA     = tempRecords;
+  SYSTEM_TRAINEES = Array.from(tempTraineesMap.values());
+
+  const sel = document.getElementById('flt-group');
+  sel.innerHTML = '<option value="ALL">كل المجموعات</option>';
+  SYSTEM_GROUPS.forEach(g => sel.innerHTML += `<option value="${g}">${g}</option>`);
+
+  updateAnalyticsAndCounters();
+  resetPaginationAndFilter();
+  executeAbsenceCheck();
+  scanConsecutiveAbsences();
+  renderDashboardCharts();
+  updateWeeklyProgressBars();
+}
+
+// ==================== ADVANCED COUNTERS & COMPARISONS ====================
+function updateAnalyticsAndCounters() {
+  document.getElementById('st-total-records').textContent   = SERVER_DATA.length;
+  document.getElementById('st-unique-trainees').textContent = SYSTEM_TRAINEES.length;
+
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Calculate Yesterday
+  const yestDate = new Date();
+  yestDate.setDate(yestDate.getDate() - 1);
+  const yesterday = yestDate.toISOString().split('T')[0];
+
+  const todayRecords = SERVER_DATA.filter(r => r.date === today);
+  const todayPresent = todayRecords.filter(r => r.type === 'حضور' || r.type === 'تأخير').length;
+  const todayAbsent  = todayRecords.filter(r => r.type === 'غياب').length;
+
+  const presentIds = new Set(todayRecords.filter(r => r.type === 'حضور' || r.type === 'تأخير').map(r => String(r.id).trim()));
+  const absentCount = SYSTEM_TRAINEES.filter(t => !presentIds.has(String(t.id).trim())).length;
+
+  document.getElementById('st-today-count').textContent   = todayPresent;
+  document.getElementById('st-today-present').textContent = todayPresent;
+  document.getElementById('st-today-absent').textContent  = todayAbsent || absentCount;
+
+  // Calculate Total Attendance Percentage & Circular Progress
+  let totalAttendancePct = 0;
+  if(SYSTEM_TRAINEES.length > 0) {
+    totalAttendancePct = Math.round((todayPresent / SYSTEM_TRAINEES.length) * 100);
+  }
+  document.getElementById('circular-progress-text').innerText = totalAttendancePct + "%";
+  
+  const circleOffset = 377 - (377 * totalAttendancePct / 100);
+  document.getElementById('circular-progress-bar').style.strokeDasharray = "377";
+  document.getElementById('circular-progress-bar').style.strokeDashoffset = circleOffset;
+
+  // Compare Today vs Yesterday
+  const yestPresent = SERVER_DATA.filter(r => r.date === yesterday && (r.type === 'حضور' || r.type === 'تأخير')).length;
+  const compBadge = document.getElementById('attendance-compare-badge');
+  
+  if(todayPresent > yestPresent) {
+    compBadge.className = "compare-badge compare-up";
+    compBadge.innerText = `⬆️ ارتفع عن الأمس (+${todayPresent - yestPresent})`;
+  } else if (todayPresent < yestPresent) {
+    compBadge.className = "compare-badge compare-down";
+    compBadge.innerText = `⬇️ انخفض عن الأمس (-${yestPresent - todayPresent})`;
+  } else {
+    compBadge.className = "compare-badge compare-equal";
+    compBadge.innerText = "🔄 مساوٍ لمعدل الأمس";
+  }
+}
+
+// ==================== WEEKLY PROGRESS PER GROUP ====================
+function updateWeeklyProgressBars() {
+  const container = document.getElementById('weekly-progress-rows-container');
+  container.innerHTML = "";
+  
+  if(SYSTEM_GROUPS.size === 0) {
+    container.innerHTML = "<div style='color:var(--muted); font-size:0.8rem;'>لا توجد مجموعات مرصودة حالياً لتمثيل خطتها.</div>";
+    return;
+  }
+
+  const totalPlannedDays = 18; 
+
+  SYSTEM_GROUPS.forEach(groupName => {
+    let filledDays = 0;
+    Object.keys(LOCAL_MATERIALS).forEach(dayKey => {
+      if(LOCAL_MATERIALS[dayKey] && LOCAL_MATERIALS[dayKey].content) filledDays++;
+    });
+    if(filledDays > totalPlannedDays) filledDays = totalPlannedDays;
+
+    const percentage = Math.round((filledDays / totalPlannedDays) * 100);
+
+    const row = document.createElement('div');
+    row.className = "wp-group-row";
+    row.innerHTML = `
+      <div style="width:35%; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">👥 ${groupName}</div>
+      <div class="wp-bar-bg">
+        <div class="wp-bar-fill" style="width: ${percentage}%"></div>
+      </div>
+      <div style="width:10%; text-align:left; font-weight:bold; color:var(--accent);">${percentage}%</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ==================== CONSECUTIVE ABSENCE DETECTION ====================
+function scanConsecutiveAbsences() {
+  const alertBox = document.getElementById('consecutive-absence-box');
+  const alertList = document.getElementById('consecutive-absence-list');
+  alertList.innerHTML = "";
+
+  const uniqueDates = Array.from(new Set(SERVER_DATA.map(r => r.date)))
+                           .sort((a,b) => b.localeCompare(a)) 
+                           .slice(0, 5); 
+
+  if(uniqueDates.length < 3) {
+    alertBox.style.display = 'none';
+    return;
+  }
+
+  let criticalAbsentees = 0;
+
+  SYSTEM_TRAINEES.forEach(trainee => {
+    let consecutiveCount = 0;
+    
+    for(let i=0; i<3; i++) {
+      const targetDate = uniqueDates[i];
+      const wasPresent = SERVER_DATA.some(r => String(r.id).trim() === String(trainee.id).trim() && 
+                                               r.date === targetDate && 
+                                               (r.type === 'حضور' || r.type === 'تأخير' || r.type === 'انصراف'));
+      
+      const explicitlyAbsent = SERVER_DATA.some(r => String(r.id).trim() === String(trainee.id).trim() && 
+                                                    r.date === targetDate && r.type === 'غياب');
+      
+      if(explicitlyAbsent || !wasPresent) {
+        consecutiveCount++;
+      } else {
+        break;
+      }
     }
 
-    function filterTrainees() {
-        const query = document.getElementById('searchBar').value.toLowerCase().trim();
-        const selectedGroup = document.getElementById('groupFilter').value;
-
-        const filtered = rawTraineesData.filter(item => {
-            const matchesSearch = item.name.toLowerCase().includes(query) || item.id.toLowerCase().includes(query);
-            const matchesGroup = (selectedGroup === 'all' || item.group === selectedGroup);
-            return matchesSearch && matchesGroup;
-        });
-
-        renderTable(filtered);
+    if(consecutiveCount >= 3) {
+      criticalAbsentees++;
+      const li = document.createElement('li');
+      li.innerText = `🚨 المتدرب: ${trainee.name} (رقم: ${trainee.id}) متغيب لـ 3 أيام تدريبية متتالية فما فوق في السجل المباشر.`;
+      alertList.appendChild(li);
     }
+  });
 
-    // ⚡ دالة رصد الحضور الحية المرتبطة باسم المستخدم النشط في حقل الإعدادات
-    function changeStatus(traineeId, traineeName, groupName, statusLabel) {
-        const scriptUrl = localStorage.getItem('scriptUrl');
-        if(!scriptUrl) { alert('يرجى تهيئة رابط البوابة البرمجية في قسم الإعدادات أولاً!'); return; }
+  alertBox.style.display = criticalAbsentees > 0 ? 'block' : 'none';
+}
 
-        // هنا تم ربط جلب اسم المستخدم من الـ Input المكتوب في الإعدادات بشكل مباشر وحي بدلاً من الاسم الثابت
-        const activeUser = document.getElementById('usernameInput').value.trim() || 'مشرف غير معرف';
+// ==================== CHARTS ====================
+function renderDashboardCharts() {
+  const today = new Date().toISOString().split('T')[0];
 
-        const payload = {
-            action: "updateStatus",
-            traineeId: traineeId,
-            traineeName: traineeName,
-            group: groupName,
-            date: document.getElementById('attendanceDate').value,
-            status: statusLabel,
-            username: activeUser
-        };
+  const pieLabels = Array.from(SYSTEM_GROUPS);
+  const pieCounts = pieLabels.map(g =>
+    SERVER_DATA.filter(r => r.group === g && r.date === today && (r.type === 'حضور' || r.type === 'تأخير')).length
+  );
 
-        fetch(scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            alert(`📥 تم رصد [${traineeName}] كـ (${statusLabel}) بواسطة [${activeUser}] بنجاح!`);
-            setTimeout(() => { loadTraineesData(); }, 1500); 
-        }).catch(() => {
-            alert('خطأ في إرسال حركة الحضور.');
-        });
+  if(chartPie) chartPie.destroy();
+  const pieCtx = document.getElementById('groupPieChart');
+  if(pieCtx) {
+    chartPie = new Chart(pieCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: pieLabels,
+        datasets: [{ data: pieCounts, backgroundColor: ['#00d4ff','#00e676','#ffd600','#ff4444','#a855f7'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: 'var(--text)', font: { family: 'Cairo', size: 12 } } } }
+      }
+    });
+  }
+
+  let hoursMap = {};
+  for(let h = 7; h <= 18; h++) hoursMap[`${h}:00`] = 0;
+  SERVER_DATA.filter(r => r.date === today && (r.type === 'حضور' || r.type === 'تأخير')).forEach(r => {
+    if(r.time) {
+      const h = parseInt(r.time.split(':')[0]);
+      const key = `${h}:00`;
+      if(hoursMap[key] !== undefined) hoursMap[key]++;
     }
+  });
 
-    // 📝 دوال تبويب الحقيبة التدريبية
-    function loadSpecificDayMaterial() {
-        const scriptUrl = localStorage.getItem('scriptUrl');
-        if (!scriptUrl) return;
-        
-        const day = document.getElementById('matDayNumber').value;
-        fetch(`${scriptUrl}?action=getMaterial&dayNumber=${day}`, { method: 'GET', redirect: 'follow' })
-        .then(res => res.json())
-        .then(data => {
-            if (data) {
-                document.getElementById('matContent').value = data.content || '';
-                document.getElementById('matDate').value = data.materialDate || '';
-            }
-        });
+  if(chartLine) chartLine.destroy();
+  const lineCtx = document.getElementById('dailyLineChart');
+  if(lineCtx) {
+    chartLine = new Chart(lineCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: Object.keys(hoursMap),
+        datasets: [{
+          label: 'حركات الحضور حسب الساعة',
+          data: Object.values(hoursMap),
+          borderColor: '#0066ff',
+          backgroundColor: 'rgba(0,102,255,.12)',
+          fill: true, tension: 0.4,
+          pointBackgroundColor: '#00d4ff'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#8899aa', font: { family: 'Cairo' } } },
+          y: { beginAtZero: true, ticks: { color: '#8899aa', stepSize: 1 } }
+        },
+        plugins: { legend: { labels: { color: '#8899aa', font: { family: 'Cairo' } } } }
+      }
+    });
+  }
+}
+
+// ==================== LOGS & PAGINATION ====================
+function resetPaginationAndFilter() {
+  currentPage = 1;
+  filterLogsData();
+}
+
+function filterLogsData() {
+  const query   = document.getElementById('flt-search').value.toLowerCase().trim();
+  const group   = document.getElementById('flt-group').value;
+  const type    = document.getElementById('flt-type').value;
+  const dateVal = document.getElementById('flt-date').value;
+
+  FILTERED_DATA = SERVER_DATA.filter(r => {
+    const ms = !query || (r.name && r.name.toLowerCase().includes(query)) || (r.id && String(r.id).includes(query));
+    const mg = group === 'ALL' || r.group === group;
+    const mt = type  === 'ALL' || r.type  === type;
+    const md = !dateVal || r.date === dateVal;
+    return ms && mg && mt && md;
+  });
+
+  const totalRecords = FILTERED_DATA.length;
+  const totalPages = Math.ceil(totalRecords / rowsPerPage) || 1;
+  
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedItems = FILTERED_DATA.slice(startIndex, endIndex);
+
+  document.getElementById('pagination-info').innerText = `عرض الأسطر ${totalRecords > 0 ? startIndex + 1 : 0}-${Math.min(endIndex, totalRecords)} من أصل ${totalRecords} سجل مصفى`;
+  document.getElementById('current-page-num').innerText = currentPage;
+
+  const tbody = document.getElementById('logs-table-body');
+  if(!paginatedItems.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">لا توجد بيانات مطابقة لخيارات البحث</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = paginatedItems.map(r => {
+    return `<tr>
+      <td style="color:var(--accent);font-weight:700">${r.id || '—'}</td>
+      <td style="font-weight:700">${r.name || '—'}</td>
+      <td style="color:var(--yellow)">${r.group}</td>
+      <td>${r.date}</td>
+      <td>${r.time}</td>
+      <td>
+        <select class="status-select" onchange="changeTraineeStatusOnSheet('${r.id}','${r.name}','${r.group}','${r.date}',this.value)">
+          <option value="حضور"    ${r.type==='حضور'   ?'selected':''}>حضور</option>
+          <option value="انصراف" ${r.type==='انصراف'?'selected':''}>انصراف</option>
+          <option value="تأخير"  ${r.type==='تأخير' ?'selected':''}>تأخير</option>
+          <option value="غياب"   ${r.type==='غياب'  ?'selected':''}>غياب</option>
+        </select>
+      </td>
+      <td><span class="audit-text">👤 ${r.changedBy}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function changePage(direction) {
+  currentPage += direction;
+  filterLogsData();
+}
+
+// ==================== EXPORT TO EXCEL SYSTEM ====================
+function exportToExcelFormat() {
+  if(FILTERED_DATA.length === 0) {
+    alert("❌ لا توجد بيانات في الجدول الحالي لتصديرها!");
+    return;
+  }
+
+  let csvContent = "\uFEFF"; 
+  csvContent += "Training ID,اسم المتدرب,المجموعة,التاريخ,الوقت,نوع الحركة,المعدل بواسطة\n";
+
+  FILTERED_DATA.forEach(r => {
+    csvContent += `"${r.id}","${r.name}","${r.group}","${r.date}","${r.time}","${r.type}","${r.changedBy}"\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute("href", url);
+  link.setAttribute("download", `سجل_الحضور_الشامل_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToastMessage("📥 تم تحميل ملف السجل متوافقاً مع Excel بنجاح!");
+}
+
+// ==================== TWO-WAY SYNC ====================
+function changeTraineeStatusOnSheet(traineeId, traineeName, group, dateStr, newStatus) {
+  if(!GOOGLE_SCRIPT_URL) { alert('❌ يرجى إعداد رابط بوابة Apps Script أولاً!'); return; }
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action:'updateStatus', traineeId, traineeName, group, date:dateStr, status:newStatus, username:CURRENT_USER })
+  }).then(() => {
+    showToastMessage(`✅ تم إرسال تعديل المتدرب ${traineeName} كـ (${newStatus})`);
+    setTimeout(fetchCsvFromGoogleSheets, 2000);
+  }).catch(err => alert('خطأ بالاتصال: ' + err));
+}
+
+// ==================== ABSENCE DETECTION ====================
+function executeAbsenceCheck() {
+  const targetDate = document.getElementById('absence-check-date').value;
+  const tbody      = document.getElementById('absence-table-body');
+  const summary    = document.getElementById('absence-summary');
+  if(!targetDate) return;
+
+  const presentIds = new Set(
+    SERVER_DATA
+      .filter(r => r.date === targetDate && (r.type === 'حضور' || r.type === 'تأخير'))
+      .map(r => String(r.id).trim())
+  );
+
+  const absentList = SYSTEM_TRAINEES.filter(t => !presentIds.has(String(t.id).trim()));
+  const presentList = SYSTEM_TRAINEES.filter(t => presentIds.has(String(t.id).trim()));
+
+  summary.innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+      <span class="badge badge-green">✅ حاضر: ${presentList.length}</span>
+      <span class="badge badge-red">❌ غائب: ${absentList.length}</span>
+      <span class="badge badge-blue">👥 الإجمالي: ${SYSTEM_TRAINEES.length}</span>
+    </div>`;
+
+  if(!absentList.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--green)">✅ حضور كامل 100% في هذا التاريخ!</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = absentList.map(t => `
+    <tr>
+      <td style="color:var(--accent);font-weight:700">${t.id || '—'}</td>
+      <td style="font-weight:700">${t.name || '—'}</td>
+      <td style="color:var(--yellow)">${t.group}</td>
+      <td><span class="badge badge-red">❌ غائب</span></td>
+      <td>
+        <button class="btn btn-primary" style="padding:4px 10px;font-size:.75rem;" onclick="changeTraineeStatusOnSheet('${t.id}','${t.name}','${t.group}','${targetDate}','تأخير')">⏱️ تأخير</button>
+        <button class="btn btn-ghost"   style="padding:4px 10px;font-size:.75rem;" onclick="changeTraineeStatusOnSheet('${t.id}','${t.name}','${t.group}','${targetDate}','حضور')">✅ حضور</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ==================== MATERIAL SYSTEM ====================
+function saveMaterialContent() {
+  const txt      = document.getElementById('material-editor').value;
+  const day      = document.getElementById('material-day-select').value;
+  const date     = document.getElementById('material-date-input').value;
+  const trainer  = document.getElementById('material-trainer').value.trim();
+  const notes    = document.getElementById('material-notes').value.trim();
+
+  if(!date) { alert('❌ يرجى اختيار تاريخ!'); return; }
+  if(!trainer) { alert('❌ يرجى إدخال اسم المدرب!'); return; }
+
+  LOCAL_MATERIALS[day] = { 
+    content: txt, 
+    materialDate: date, 
+    trainer, 
+    notes, 
+    username: CURRENT_USER, 
+    savedAt: new Date().toLocaleString('ar-SA') 
+  };
+  localStorage.setItem('local_materials', JSON.stringify(LOCAL_MATERIALS));
+
+  if(GOOGLE_SCRIPT_URL) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        action:'updateMaterial', 
+        content:txt, 
+        dayNumber:day, 
+        materialDate:date, 
+        trainer, 
+        notes, 
+        username:CURRENT_USER 
+      })
+    }).then(() => {
+      showToastMessage(`✅ تم حفظ وتأكيد بيانات (${day}) على السيرفر المركزي`);
+      updateSidebarDaysTable();
+      updateWeeklyProgressBars();
+    }).catch(() => {
+      showToastMessage(`✅ تم الحفظ محلياً بفولدر التخزين المؤقت للحقائب`);
+      updateSidebarDaysTable();
+      updateWeeklyProgressBars();
+    });
+  } else {
+    showToastMessage(`✅ تم الحفظ محلياً التلقائي`);
+    updateSidebarDaysTable();
+    updateWeeklyProgressBars();
+  }
+
+  document.getElementById('material-audit-info').innerHTML = `📝 آخر تعديل: <strong style="color:var(--accent)">${CURRENT_USER}</strong> | ${new Date().toLocaleString('ar-SA')}`;
+}
+
+function loadMaterialContent() {
+  const day = document.getElementById('material-day-select').value;
+  const saved = LOCAL_MATERIALS[day];
+  if(saved) {
+    document.getElementById('material-editor').value     = saved.content || '';
+    document.getElementById('material-date-input').value = saved.materialDate || new Date().toISOString().split('T')[0];
+    document.getElementById('material-trainer').value    = saved.trainer || '';
+    document.getElementById('material-notes').value      = saved.notes || '';
+    document.getElementById('material-audit-info').innerHTML = `📝 آخر تعديل: <strong style="color:var(--accent)">${saved.username}</strong>`;
+  } else {
+    document.getElementById('material-editor').value     = '';
+    document.getElementById('material-date-input').value = new Date().toISOString().split('T')[0];
+    document.getElementById('material-trainer').value    = '';
+    document.getElementById('material-notes').value      = '';
+    document.getElementById('material-audit-info').innerHTML = `💡 <span style="color:var(--green)">هذا اليوم (${day}) فارغ ومتاح للتعبئة الكاملة.</span>`;
+  }
+
+  if(GOOGLE_SCRIPT_URL) {
+    fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterial&dayNumber=${encodeURIComponent(day)}`)
+    .then(r => r.json())
+    .then(data => {
+      if(data && data.materialDate) {
+        document.getElementById('material-editor').value     = data.content || '';
+        document.getElementById('material-date-input').value = data.materialDate;
+        document.getElementById('material-trainer').value    = data.trainer || '';
+        document.getElementById('material-notes').value      = data.notes || '';
+        LOCAL_MATERIALS[day] = data;
+        localStorage.setItem('local_materials', JSON.stringify(LOCAL_MATERIALS));
+        document.getElementById('material-audit-info').innerHTML = `📝 آخر تعديل سحابي: <strong style="color:var(--accent)">${data.username}</strong>`;
+      }
+    }).catch(() => {});
+  }
+  updateSidebarDaysTable();
+}
+
+function updateSidebarDaysTable() {
+  const container = document.getElementById('days-table-container');
+  const entries   = Object.entries(LOCAL_MATERIALS);
+
+  if(!entries.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:20px;">📭 لا توجد سجلات محفوظة بعد.</div>';
+    if(GOOGLE_SCRIPT_URL) {
+      fetch(`${GOOGLE_SCRIPT_URL}?action=getMaterialList`)
+      .then(r => r.json())
+      .then(list => {
+        if(list && list.length) renderDaysTable(list);
+      }).catch(() => {});
     }
+    return;
+  }
 
-    function submitMaterialForm() {
-        const scriptUrl = localStorage.getItem('scriptUrl');
-        if (!scriptUrl) { alert('يرجى حفظ رابط بوابة التعديل أولاً!'); return; }
-        
-        const activeUser = document.getElementById('usernameInput').value.trim() || 'مشرف غير معرف';
+  const list = entries.map(([day, data]) => ({ 
+    dayNumber: day, 
+    materialDate: data.materialDate, 
+    trainer: data.trainer, 
+    content: data.content, 
+    username: data.username 
+  }));
+  list.sort((a, b) => (a.materialDate || '').localeCompare(b.materialDate || ''));
+  renderDaysTable(list);
+}
 
-        const payload = {
-            action: "updateMaterial",
-            dayNumber: document.getElementById('matDayNumber').value,
-            materialDate: document.getElementById('matDate').value,
-            content: document.getElementById('matContent').value.trim(),
-            username: activeUser
-        };
+// 🛠️ دالة بناء الجدول مع خاصية التفاف الأسطر والكسر الذكي للكلمات لمنع القطع والاختفاء
+function renderDaysTable(list) {
+  const container = document.getElementById('days-table-container');
+  container.innerHTML = `
+    <table class="day-table" style="table-layout: fixed; width: 100%;">
+      <thead>
+        <tr>
+          <th style="width: 30%;">اليوم</th>
+          <th style="width: 35%;">التاريخ</th>
+          <th style="width: 35%;">المحتوى والمدرب</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(item => `
+          <tr style="cursor:pointer;" onclick="selectDayFromSidebar('${item.dayNumber}')">
+            <td style="color:var(--accent); font-weight:700; word-break: break-word;">${item.dayNumber}</td>
+            <td style="color:var(--yellow); font-size:.78rem; word-break: break-word;">${item.materialDate || '—'}</td>
+            <td style="font-size:.75rem; color:var(--text); word-break: break-word; overflow: visible; white-space: normal; line-height: 1.4;">
+              <span style="color:var(--green); font-weight:bold; display:block; margin-bottom:2px;">👨‍🏫 ${item.trainer || '—'}</span>
+              <span style="color:var(--muted); font-size:.72rem;">${item.content || '—'}</span>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
 
-        fetch(scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            alert(`📥 تم حفظ وتحديث تفاصيل الحقيبة بواسطة [${activeUser}] في السيرفر!`);
-            setTimeout(() => { loadMaterialTable(); }, 1500);
-        });
-    }
+function selectDayFromSidebar(dayName) {
+  document.getElementById('material-day-select').value = dayName;
+  loadMaterialContent();
+}
 
-    function loadMaterialTable() {
-        const scriptUrl = localStorage.getItem('scriptUrl');
-        if (!scriptUrl) return;
+document.getElementById('material-day-select').addEventListener('change', loadMaterialContent);
 
-        fetch(`${scriptUrl}?action=getMaterialList`, { method: 'GET', redirect: 'follow' })
-        .then(res => res.json())
-        .then(list => {
-            const tbody = document.querySelector('#materialTable tbody');
-            tbody.innerHTML = '';
-            
-            if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">لا توجد مواد تدريبية محفوظة حالياً.</td></tr>`;
-                return;
-            }
-            
-            list.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>اليوم ${item.dayNumber}</b></td>
-                    <td>${item.materialDate || '—'}</td>
-                    <td><div style="max-width:500px; white-space:pre-wrap;">${item.content}</div></td>
-                    <td><span class="status-badge status-present" style="color:var(--accent-blue); background:rgba(0,180,216,0.15);">${item.username}</span></td>
-                    <td style="font-size:12px; color:var(--text-muted);">${item.time}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        });
-    }
+// ==================== SETTINGS ====================
+function saveSystemSettings() {
+  GOOGLE_CSV_URL    = document.getElementById('cfg-csv-url').value.trim();
+  GOOGLE_SCRIPT_URL = document.getElementById('cfg-script-url').value.trim();
+  localStorage.setItem('dash_google_csv',    GOOGLE_CSV_URL);
+  localStorage.setItem('dash_script_url',    GOOGLE_SCRIPT_URL);
+  alert('⚙️ تم حفظ الإعدادات بنجاح!');
+  fetchCsvFromGoogleSheets();
+}
 </script>
 </body>
 </html>
